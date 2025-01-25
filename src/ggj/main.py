@@ -13,9 +13,12 @@ from .world import rock as ro
 from .world.camera import Camera
 from .world.manager import WorldManager
 
+
+LOG_NAME = Path(f"logs/{datetime.datetime.now()}.log")
+LOG_NAME.parent.mkdir(exist_ok=True)
 logging.basicConfig(
     format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
-    filename=f"{datetime.datetime.now()}.log",
+    filename=LOG_NAME,
     level=logging.DEBUG,
 )
 il: Optional[KeyboardListener] = None  # TODO sort this out...
