@@ -12,6 +12,7 @@ GLISTEN_BLUE=39
 LIGHT_BROWN=136
 LIGHT_YELLOW=184
 GOLDEN=178
+MAROON=1
 
 def rect(
     win: window, start_x: int, start_y: int, end_x: int, end_y: int

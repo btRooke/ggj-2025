@@ -28,8 +28,7 @@ class Inventory:
         self.inventory.append(wiedable)
 
 class Player(Collidable):
-    def __init__(self, x: int, y: int, win: window):
-        self.window = win
+    def __init__(self, x: int, y: int):
         self.pos: list[int] = [x, y]
         self.inventory = Inventory()
 
@@ -37,8 +36,9 @@ class Player(Collidable):
         pass
 
     def draw(self):
+        assert WorldManager.screen
         x, y = self.pos
-        s.world_char(self.window, x, y, "#", s.DARK_RED)
+        s.world_char(WorldManager.screen, x, y, "#", s.DARK_RED)
 
     def get_pos(self) -> tuple[int, int]:
         return self.pos[0], self.pos[1]

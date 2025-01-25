@@ -6,7 +6,7 @@ from curses import window
 from pathlib import Path
 from mypy import api
 
-from ggj.item import Item
+from .item import Item
 from .input import KeyboardListener
 from .world import terrain
 from .world import player
@@ -52,11 +52,8 @@ def _run_mypy() -> None:
 
 
 def world_loop(stdscr: window):
-
     # inventory
-
     inventory = {Item("Wooden Stick", traits=["tool"]): 1}
-
     # curses stuff
 
     curses.use_default_colors()
@@ -82,7 +79,7 @@ def world_loop(stdscr: window):
     logger.info(f"world beginning y/x {WorldManager.screen.getbegyx()}")
     logger.info(f"world screen y/x {WorldManager.screen.getmaxyx()}")
 
-    terrain.TerrainFactory.create_terrain(WORLD_TILES, world_window)
+    terrain.TerrainFactory.create_terrain(WORLD_TILES)
 
     player_start_x = int(len(WORLD_TILES[0]) / 2)
     player_start_y = int(len(WORLD_TILES[1]) / 2)
@@ -99,13 +96,12 @@ def world_loop(stdscr: window):
 
     Camera.move_camera((player_start_x, player_start_y))
     # hook up movement
-    p = player.Player(player_start_x, player_start_y, world_window)
+    p = player.Player(player_start_x, player_start_y)
     p.pickup(Shovel(p))
     WorldManager.add_object(p)
 
     def move(move_vector: tuple[int, int]):
         p.move(move_vector)
-        # world_window.erase()
 
     il = KeyboardListener(stdscr)
     il.callbacks["a"] = lambda: move((-1, 0))
@@ -124,7 +120,6 @@ def world_loop(stdscr: window):
     world_window.refresh()
 
     # events
-
     events = Events(
         [
             Event(
@@ -135,9 +130,7 @@ def world_loop(stdscr: window):
             )
         ]
     )
-
     # main loop
-
     last_tick = 0.0
 
     while True:

@@ -3,7 +3,6 @@ from curses import window
 from .gameobject import GameObject
 from .camera import Camera
 
-
 class WorldManager:
     objects: ClassVar[list[GameObject]] = []
     screen: ClassVar[Optional[window]] = None
