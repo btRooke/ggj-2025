@@ -1,10 +1,11 @@
 import sys
 from pathlib import Path
-
 from mypy import api
+import curses
+from curses import window
+from .drawing import shape as s
 
 PACKAGE_ROOT = Path(__file__).parent.resolve()
-
 
 def _run_mypy() -> None:
     """
@@ -18,7 +19,18 @@ def _run_mypy() -> None:
     if code != 0:
         exit(code)
 
+def example_draw_rectangle(stdscr: window):
+    stdscr.clear()
+    stdscr.refresh()
+
+    while True:
+        stdscr.refresh ()
+        s.rect (stdscr, 1, 10, 20, 20)
 
 if __name__ == "__main__":
     _run_mypy()
-    print("Game code here")
+    try:
+        curses.wrapper (example_draw_rectangle)
+    except Exception as e:
+        curses.endwin()
+        raise
