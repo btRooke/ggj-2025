@@ -4,15 +4,11 @@ import logging
 import sys
 from curses import window
 from pathlib import Path
-from typing import Optional
-
 from mypy import api
-
 from .input import KeyboardListener
-from .world import rock as ro
+from .world import terrain
 from .world.camera import Camera
 from .world.manager import WorldManager
-
 
 LOG_NAME = Path(f"logs/{datetime.datetime.now()}.log")
 LOG_NAME.parent.mkdir(exist_ok=True)
@@ -25,8 +21,7 @@ logger = logging.getLogger(__name__)
 PACKAGE_ROOT = Path(__file__).parent.resolve()
 
 
-world_layout: list[list[int]] = [[0, 1, 1]]
-
+world_layout: list[list[int]] = [[i in {0, 49} or x in {0, 49} for i in range (0, 50)] for x in range(0, 50)]
 
 def _run_mypy() -> None:
     """
@@ -40,23 +35,40 @@ def _run_mypy() -> None:
     if code != 0:
         exit(code)
 
+def generate_world(screen: window):
+    lim_x = 125
+    lim_y = 40
+
+    offset = 2
+
+    for y in range(lim_y):
+        for x in range(lim_x):
+            if offset <= x < lim_x - offset and offset <= y < lim_y - offset:
+                WorldManager.add_object(terrain.Rock(x, y, screen))
+            else:
+                WorldManager.add_object(terrain.Boundary(x, y, screen))
 
 def world_loop(stdscr: window):
+    curses.use_default_colors()
+    curses.start_color()
+    curses.curs_set(False)
+
+    for i in range(curses.COLORS):
+        curses.init_pair(i, i, -1)
 
     WorldManager.init(stdscr)
 
-    def move():
-        Camera.move_camera((-1, 0))
+    def move(move_vector: tuple[int, int]):
+        Camera.move_camera(move_vector)
         stdscr.clear()
 
     il = KeyboardListener(stdscr)
-    il.callbacks["a"] = move
+    il.callbacks["a"] = lambda: move((1, 0))
+    il.callbacks["d"] = lambda: move((-1, 0))
+    il.callbacks["s"] = lambda: move((0, -1))
+    il.callbacks["w"] = lambda: move((0, 1))
 
-    for y, row in enumerate(world_layout):
-        for x, obj in enumerate(row):
-            if obj == 1:
-                r = ro.Rock(x * ro.ROCK_SIZE, y * ro.ROCK_SIZE, stdscr)
-                WorldManager.add_object(r)
+    generate_world(stdscr)
 
     stdscr.clear()
     stdscr.refresh()
