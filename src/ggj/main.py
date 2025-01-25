@@ -62,6 +62,7 @@ def world_loop(stdscr: window):
     # calculate where to put world viewer
 
     max_height, max_width = stdscr.getmaxyx()
+    assert (max_width, max_height) == (80, 24), "terminal size must 80x24"
     world_height, world_width = max_height * 0.75, max_width * 0.75
     world_window = curses.newwin(
         int(world_height),
