@@ -12,6 +12,7 @@ from .world.camera import Camera
 from .interface import InterfaceObject
 from .interface.windows import WorldViewerBorder, RightOptionsMenu
 from .world.manager import WorldManager
+from .world.tiles import WORLD_TILES
 
 logging.basicConfig(
     format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
@@ -41,22 +42,6 @@ def _run_mypy() -> None:
         exit(code)
 
 
-LIM_X: int = 150
-LIM_Y: int = 100
-
-
-def generate_world(screen: window):
-    offset = 10
-
-    for y in range(LIM_Y):
-        for x in range(LIM_X):
-            if offset <= x < LIM_X - offset and offset <= y < LIM_Y - offset:
-                WorldManager.add_object(terrain.Grass(x, y, screen))
-
-            else:
-                WorldManager.add_object(terrain.Boundary(x, y, screen))
-
-
 def world_loop(stdscr: window):
     curses.use_default_colors()
     curses.start_color()
@@ -81,9 +66,10 @@ def world_loop(stdscr: window):
     logger.info(f"world beginning y/x {WorldManager.screen.getbegyx()}")
     logger.info(f"world screen y/x {WorldManager.screen.getmaxyx()}")
 
-    player_start_x = int(LIM_X / 2)
-    player_start_y = int(LIM_Y / 2)
+    terrain.TerrainFactory.create_terrain(WORLD_TILES, world_window)
 
+    player_start_x = int(len(WORLD_TILES[0]) / 2)
+    player_start_y = int(len(WORLD_TILES[1]) / 2)
     # interface components
 
     interface_components: list[InterfaceObject] = [
@@ -110,8 +96,6 @@ def world_loop(stdscr: window):
 
     # put rocks in
     world_window.nodelay(True)
-
-    generate_world(world_window)
 
     stdscr.clear()
     stdscr.refresh()
