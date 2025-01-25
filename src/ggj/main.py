@@ -35,15 +35,15 @@ def _run_mypy() -> None:
     if code != 0:
         exit(code)
 
+LIM_X: int = 150
+LIM_Y: int = 100
 
 def generate_world(screen: window):
-    lim_x = 150
-    lim_y = 100
     offset = 10
 
-    for y in range(lim_y):
-        for x in range(lim_x):
-            if offset <= x < lim_x - offset and offset <= y < lim_y - offset:
+    for y in range(LIM_Y):
+        for x in range(LIM_X):
+            if offset <= x < LIM_X - offset and offset <= y < LIM_Y - offset:
                 WorldManager.add_object(terrain.Rock(x, y, screen))
             else:
                 WorldManager.add_object(terrain.Boundary(x, y, screen))
@@ -73,6 +73,8 @@ def world_loop(stdscr: window):
     logger.info(f"whole screen dims y/x {stdscr.getmaxyx()}")
     logger.info(f"world beginning y/x {WorldManager.screen.getbegyx()}")
     logger.info(f"whole screen y/x {WorldManager.screen.getmaxyx()}")
+
+    Camera.move_camera((int(LIM_X / 2), int(LIM_Y / 2)))
 
     # hook up movement
 
