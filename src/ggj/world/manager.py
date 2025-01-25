@@ -1,5 +1,5 @@
-from typing import ClassVar, Optional, Dict, Iterable
-from curses import window, textpad
+from typing import ClassVar, Optional, Dict
+from curses import window
 from .gameobject import GameObject
 from .camera import Camera
 
@@ -43,6 +43,11 @@ class WorldManager:
     def init(screen: window):
         WorldManager.screen = screen
 
+    @staticmethod
+    def _get_objects(x: int, y:int) -> list[GameObject]:
+        return list(filter(lambda o: o.get_pos() == (x, y) and not o.impassable(),
+                           WorldManager.objects))
+
     """
     Determine if the given square is 'placeable'. Meaning that
     an object can be put on the square or the player can move
@@ -50,4 +55,16 @@ class WorldManager:
     """
     @staticmethod
     def can_place(x: int, y: int) -> int:
-        return len(list(filter(lambda o: o.get_pos() == (x, y) and o.impassable(), WorldManager.objects))) == 0
+        return len(WorldManager._get_objects(x, y)) > 0
+
+    @staticmethod
+    def clear_cell(x: int, y: int):
+        """
+        clear all objects in the given location that is not the player
+        """
+        objs = WorldManager._get_objects(x, y)
+        # all terrain is at zindex 0
+        objs = list(filter(lambda o: o.zindex() == 0, objs))
+
+        for obj in objs:
+            WorldManager.objects.remove(obj)

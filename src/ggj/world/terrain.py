@@ -4,18 +4,20 @@ from ..drawing import shape as s
 from .manager import WorldManager
 from .gameobject import GameObject
 import logging
+import random
 
 class Grass:
     def __init__(self, x: int, y: int, win: window):
         self.window = win
         self.pos = [x, y]
+        self.colour = s.GREEN if random.random() < 0.85 else s.DEEP_GREEN
 
     def update(self):
         pass
 
     def draw(self):
         x, y = self.pos
-        s.world_char(self.window, x, y, ';', s.GREEN)
+        s.world_char(self.window, x, y, ';', self.colour)
 
     def get_pos(self) -> tuple[int, int]:
         return self.pos[0], self.pos[1]
@@ -36,6 +38,7 @@ class Boundary:
 
     def draw(self):
         x, y = self.pos
+
         s.world_char(self.window, x, y, '♠', s.DARK_GREEN)
 
     def get_pos(self) -> tuple[int, int]:

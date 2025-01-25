@@ -2,12 +2,13 @@ import curses
 import curses.textpad as text
 from curses import window
 from ..world.camera import Camera
-import logging
 
 GREEN=108
+DEEP_GREEN=106
 DARK_GREEN=22
 DARK_RED=88
 DEEP_BLUE=21
+GLISTEN_BLUE=39
 LIGHT_BROWN=136
 LIGHT_YELLOW=184
 GOLDEN=178

@@ -2,16 +2,36 @@ import curses
 from curses import window
 from ..drawing import shape as s
 from .camera import Camera
-from .gameobject import Collidable, GameObject
+from .gameobject import Collidable, GameObject, Wiedable
 from .manager import WorldManager
 
 MOVE_CAMERA_COLS = 5
 
+class Inventory:
+    def __init__(self):
+        self.inventory: list[Wiedable] = []
+        self.active_idx = 0
+
+    def set_active_idx(self, idx: int):
+        self.active_idx = idx
+
+    def length(self) -> int:
+        return len(self.inventory)
+
+    def get_items(self) -> list[Wiedable]:
+        return list(self.inventory)
+
+    def get_active(self) -> Wiedable:
+        return self.inventory[self.active_idx]
+
+    def add(self, wiedable: Wiedable):
+        self.inventory.append(wiedable)
 
 class Player(Collidable):
     def __init__(self, x: int, y: int, win: window):
         self.window = win
         self.pos: list[int] = [x, y]
+        self.inventory = Inventory()
 
     def update(self):
         pass
@@ -55,3 +75,9 @@ class Player(Collidable):
 
     def on_collide(self, object: GameObject):
         pass
+
+    def execute(self):
+        self.inventory.get_active().execute()
+
+    def pickup(self, wiedable: Wiedable):
+        self.inventory.add(wiedable)

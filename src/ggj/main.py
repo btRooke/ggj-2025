@@ -21,11 +21,12 @@ from .interface.windows import (
 )
 from .world.manager import WorldManager
 from .world.tiles import WORLD_TILES
+from .world.items import Shovel
 
 logging.basicConfig(
     format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
     filename="ggj.log",
-    level=logging.INFO,
+    level=logging.DEBUG,
 )
 logger = logging.getLogger(__name__)
 PACKAGE_ROOT = Path(__file__).parent.resolve()
@@ -99,6 +100,7 @@ def world_loop(stdscr: window):
     Camera.move_camera((player_start_x, player_start_y))
     # hook up movement
     p = player.Player(player_start_x, player_start_y, world_window)
+    p.pickup(Shovel(p))
     WorldManager.add_object(p)
 
     def move(move_vector: tuple[int, int]):
@@ -110,6 +112,7 @@ def world_loop(stdscr: window):
     il.callbacks["d"] = lambda: move((1, 0))
     il.callbacks["s"] = lambda: move((0, 1))
     il.callbacks["w"] = lambda: move((0, -1))
+    il.callbacks["x"] = lambda: p.execute()
 
     # put rocks in
     world_window.nodelay(True)

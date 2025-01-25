@@ -23,3 +23,10 @@ class Collidable():
     collide.
     """
     def on_collide(self, object: GameObject): ...
+
+class Wiedable():
+    """
+    Objects that implement this can be picked up and perform an 'action'.
+    Examples of wiedable items may be a scythe or a shovel.
+    """
+    def execute(self): ...
