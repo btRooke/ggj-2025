@@ -4,8 +4,34 @@ from mypy import api
 import curses
 from curses import window
 from .drawing import shape as s
+from .world import rock as ro
+from .world.manager import WorldManager
+from .world.camera import Camera
 
 PACKAGE_ROOT = Path(__file__).parent.resolve()
+
+world_layout: list[list[int]] = [
+    [0, 1, 1, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 1, 1, 1, 0 ,0],
+    [0, 1, 1, 0, 0, 0, 0, 0],
+    [0, 1, 1, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 1, 1, 1, 0 ,0],
+    [0, 1, 1, 0, 0, 0, 0, 0],
+    [0, 1, 1, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 1, 1, 1, 0 ,0],
+    [0, 1, 1, 0, 0, 0, 0, 0],
+    [0, 1, 1, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 1, 1, 1, 0 ,0],
+    [0, 1, 1, 0, 0, 0, 0, 0],
+]
 
 def _run_mypy() -> None:
     """
@@ -19,18 +45,26 @@ def _run_mypy() -> None:
     if code != 0:
         exit(code)
 
-def example_draw_rectangle(stdscr: window):
+def world_loop(stdscr: window):
+    c = Camera()
+    WorldManager.init(stdscr, c)
+
+    for y, row in enumerate(world_layout):
+        for x, obj in enumerate(row):
+            if obj == 1:
+                r = ro.Rock (x * ro.ROCK_SIZE, y * ro.ROCK_SIZE, stdscr)
+                WorldManager.add_object(r)
+
     stdscr.clear()
     stdscr.refresh()
 
     while True:
-        stdscr.refresh ()
-        s.rect (stdscr, 1, 10, 20, 20)
+        WorldManager.draw()
 
 if __name__ == "__main__":
     _run_mypy()
     try:
-        curses.wrapper (example_draw_rectangle)
+        curses.wrapper (world_loop)
     except Exception as e:
         curses.endwin()
         raise
