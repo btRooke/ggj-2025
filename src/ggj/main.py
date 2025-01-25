@@ -6,6 +6,7 @@ from pathlib import Path
 from mypy import api
 from .input import KeyboardListener
 from .world import terrain
+from .world import player
 from .world.camera import Camera
 from .world.manager import WorldManager
 
@@ -45,6 +46,7 @@ def generate_world(screen: window):
         for x in range(LIM_X):
             if offset <= x < LIM_X - offset and offset <= y < LIM_Y - offset:
                 WorldManager.add_object(terrain.Rock(x, y, screen))
+
             else:
                 WorldManager.add_object(terrain.Boundary(x, y, screen))
 
@@ -58,7 +60,6 @@ def world_loop(stdscr: window):
         curses.init_pair(i, i, -1)
 
     # calculate where to put world viewer
-
     max_height, max_width = stdscr.getmaxyx()
     world_height, world_width = 20, 20 * 2
     world_window = curses.newwin(
@@ -74,19 +75,23 @@ def world_loop(stdscr: window):
     logger.info(f"world beginning y/x {WorldManager.screen.getbegyx()}")
     logger.info(f"whole screen y/x {WorldManager.screen.getmaxyx()}")
 
-    Camera.move_camera((int(LIM_X / 2), int(LIM_Y / 2)))
+    player_start_x = int(LIM_X / 2)
+    player_start_y = int(LIM_Y / 2)
 
+    Camera.move_camera((player_start_x, player_start_y))
     # hook up movement
+    p = player.Player(player_start_x, player_start_y, world_window)
+    WorldManager.add_object(p)
 
     def move(move_vector: tuple[int, int]):
-        Camera.move_camera(move_vector)
+        p.move(move_vector)
         world_window.erase()
 
     il = KeyboardListener(stdscr)
-    il.callbacks["a"] = lambda: move((1, 0))
-    il.callbacks["d"] = lambda: move((-1, 0))
-    il.callbacks["s"] = lambda: move((0, -1))
-    il.callbacks["w"] = lambda: move((0, 1))
+    il.callbacks["a"] = lambda: move((-1, 0))
+    il.callbacks["d"] = lambda: move((1, 0))
+    il.callbacks["s"] = lambda: move((0, 1))
+    il.callbacks["w"] = lambda: move((0, -1))
 
     # put rocks in
     world_window.nodelay(True)
@@ -100,11 +105,9 @@ def world_loop(stdscr: window):
     world_window.refresh()
 
     # main loop
-
     while True:
         WorldManager.draw()
         il.check_input()
-
 
 if __name__ == "__main__":
     _run_mypy()
