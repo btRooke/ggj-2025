@@ -8,6 +8,7 @@ import logging
 GREEN=108
 DARK_GREEN=22
 DARK_RED=88
+DEEP_BLUE=21
 
 logger = logging.getLogger(__name__)
 
