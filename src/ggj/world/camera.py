@@ -1,14 +1,26 @@
+from typing import ClassVar
 
 class Camera:
-    def __init__(self):
-        self.x = 0
-        self.y = 0
+    pos: ClassVar[list[int]] = [0, 0]
 
-    def update(self):
+    @staticmethod
+    def update():
         pass
 
-    def draw(self):
+    @staticmethod
+    def draw():
         pass
 
-    def get_pos(self):
-        return (self.x, self.y)
+    @staticmethod
+    def init():
+        pass
+
+    @staticmethod
+    def get_pos() -> tuple[int, int]:
+        return (Camera.pos[0], Camera.pos[1])
+
+    @staticmethod
+    def move_camera(mov_vec: tuple[int, int]):
+        x, y = mov_vec
+        Camera.pos[0] += x
+        Camera.pos[1] += y

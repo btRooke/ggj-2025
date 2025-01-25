@@ -5,7 +5,6 @@ from .camera import Camera
 
 class WorldManager:
     objects: ClassVar[list[GameObject]] = []
-    camera: ClassVar[Optional[Camera]] = None
     screen: ClassVar[Optional[window]] = None
 
     @staticmethod
@@ -14,8 +13,7 @@ class WorldManager:
 
     @staticmethod
     def update():
-        if WorldManager.camera:
-            WorldManager.camera.update()
+        Camera.update()
 
         for obj in WorldManager.objects:
             obj.update()
@@ -31,6 +29,5 @@ class WorldManager:
             obj.draw()
 
     @staticmethod
-    def init(screen: window, camera: Camera):
+    def init(screen: window):
         WorldManager.screen = screen
-        WorldManager.camera = camera

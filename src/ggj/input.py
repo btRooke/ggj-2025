@@ -1,7 +1,7 @@
 import curses
 import logging
 from threading import Thread
-from typing import override
+from typing_extensions import override
 
 logger = logging.getLogger(__name__)
 

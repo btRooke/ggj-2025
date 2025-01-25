@@ -83,17 +83,7 @@ class Coords:
 
 
 def world_loop(stdscr: window):
-
-    # coords = Coords(3, 3)
-    # il = KeyboardListener(stdscr)
-    # il.callbacks["w"] = lambda: coords.s()
-    # il.callbacks["s"] = lambda: coords.n()
-    # il.callbacks["a"] = lambda: coords.w()
-    # il.callbacks["d"] = lambda: coords.e()
-    # il.start()
-
-    c = Camera()
-    WorldManager.init(stdscr, c)
+    WorldManager.init(stdscr)
 
     for y, row in enumerate(world_layout):
         for x, obj in enumerate(row):
