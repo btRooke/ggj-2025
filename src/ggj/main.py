@@ -64,7 +64,6 @@ def _run_mypy() -> None:
 
 
 class Coords:
-
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -84,6 +83,10 @@ class Coords:
 
 def world_loop(stdscr: window):
     WorldManager.init(stdscr)
+
+    il = KeyboardListener(stdscr)
+    il.callbacks["a"] = lambda: Camera.move_camera((-1, 0))
+    il.start()
 
     for y, row in enumerate(world_layout):
         for x, obj in enumerate(row):
