@@ -62,7 +62,7 @@ def world_loop(stdscr: window):
     # calculate where to put world viewer
 
     max_height, max_width = stdscr.getmaxyx()
-    world_height, world_width = max_height * 0.75, max_width * 0.75
+    world_height, world_width = 20, 20 * 2
     world_window = curses.newwin(
         int(world_height),
         int(world_width),
