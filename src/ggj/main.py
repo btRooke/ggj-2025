@@ -82,6 +82,8 @@ class Coords:
 
 
 def world_loop(stdscr: window):
+    global il
+
     WorldManager.init(stdscr)
 
     il = KeyboardListener(stdscr)
@@ -105,10 +107,10 @@ if __name__ == "__main__":
     _run_mypy()
     try:
         curses.wrapper(world_loop)
-    except Exception as e:
-        logger.debug("stopping game")
-        curses.endwin()
-        if il:
+    except (KeyboardInterrupt, Exception) as e:
+        if il is not None:
             logger.debug("stopping IL")
             il.shutdown()
+        logger.debug("stopping game")
+        curses.endwin()
         raise

@@ -13,7 +13,7 @@ class KeyboardListener(Thread):
         self.callbacks: dict = {}
         self._w = w
         self._running = True
-        self._w.timeout(1000)  # ms
+        self._w.timeout(500)  # ms
 
     @override
     def run(self):
@@ -22,10 +22,10 @@ class KeyboardListener(Thread):
 
         while self._running:
             raw_char = self._w.getch()
-            logger.debug(f"got {raw_char}")
             if raw_char == curses.ERR:
                 continue
             c = chr(raw_char)
+            logger.debug(f"got char {c}")
             if c in self.callbacks:
                 self.callbacks[c]()
 
@@ -34,3 +34,4 @@ class KeyboardListener(Thread):
     def shutdown(self):
         logger.debug(f"requested shutdown")
         self._running = False
+        self.join()
