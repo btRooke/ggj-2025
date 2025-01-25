@@ -13,12 +13,9 @@ from .world import rock as ro
 from .world.camera import Camera
 from .world.manager import WorldManager
 
-
-LOG_NAME = Path(f"logs/{datetime.datetime.now()}.log")
-LOG_NAME.parent.mkdir(exist_ok=True)
 logging.basicConfig(
     format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
-    filename=LOG_NAME,
+    filename="ggj.log",
     level=logging.DEBUG,
 )
 logger = logging.getLogger(__name__)
@@ -43,7 +40,24 @@ def _run_mypy() -> None:
 
 def world_loop(stdscr: window):
 
-    WorldManager.init(stdscr)
+    # calculate where to put world viewer
+
+    max_height, max_width = stdscr.getmaxyx()
+    world_height, world_width = max_height * 0.75, max_width * 0.75
+    world_window = curses.newwin(
+        int(world_height),
+        int(world_width),
+        int(max_height / 2 - world_height / 2),
+        int(max_width / 2 - world_width / 2),
+    )
+    WorldManager.init(world_window)
+    assert WorldManager.screen is not None
+    logger.info(f"whole screen beginning y/x {stdscr.getbegyx()}")
+    logger.info(f"whole screen dims y/x {stdscr.getmaxyx()}")
+    logger.info(f"world beginning y/x {WorldManager.screen.getbegyx()}")
+    logger.info(f"whole screen y/x {WorldManager.screen.getmaxyx()}")
+
+    # hook up movement
 
     def move():
         Camera.move_camera((-1, 0))
@@ -52,14 +66,18 @@ def world_loop(stdscr: window):
     il = KeyboardListener(stdscr)
     il.callbacks["a"] = move
 
+    # put some rocks in the world
+
     for y, row in enumerate(world_layout):
         for x, obj in enumerate(row):
             if obj == 1:
-                r = ro.Rock(x * ro.ROCK_SIZE, y * ro.ROCK_SIZE, stdscr)
+                r = ro.Rock(x * ro.ROCK_SIZE, y * ro.ROCK_SIZE, world_window)
                 WorldManager.add_object(r)
 
     stdscr.clear()
     stdscr.refresh()
+
+    # main loop
 
     while True:
         WorldManager.draw()
@@ -68,6 +86,7 @@ def world_loop(stdscr: window):
 
 if __name__ == "__main__":
     _run_mypy()
+    logger.info(f"new game started")
     try:
         curses.wrapper(world_loop)
     except (KeyboardInterrupt, Exception) as e:
