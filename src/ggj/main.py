@@ -9,6 +9,9 @@ from typing import Optional
 from mypy import api
 
 from .input import KeyboardListener
+from .world import rock as ro
+from .world.camera import Camera
+from .world.manager import WorldManager
 
 logging.basicConfig(
     format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
@@ -18,6 +21,30 @@ logging.basicConfig(
 il: Optional[KeyboardListener] = None  # TODO sort this out...
 logger = logging.getLogger(__name__)
 PACKAGE_ROOT = Path(__file__).parent.resolve()
+
+
+world_layout: list[list[int]] = [
+    [0, 1, 1, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 1, 1, 1, 0, 0],
+    [0, 1, 1, 0, 0, 0, 0, 0],
+    [0, 1, 1, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 1, 1, 1, 0, 0],
+    [0, 1, 1, 0, 0, 0, 0, 0],
+    [0, 1, 1, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 1, 1, 1, 0, 0],
+    [0, 1, 1, 0, 0, 0, 0, 0],
+    [0, 1, 1, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 1, 1, 1, 0, 0],
+    [0, 1, 1, 0, 0, 0, 0, 0],
+]
 
 
 def _run_mypy() -> None:
@@ -52,33 +79,41 @@ class Coords:
         self.x -= 1
 
 
-def example_draw_rectangle(stdscr: window):
-    global il
+def world_loop(stdscr: window):
+    # global il
+    #
+    # coords = Coords(3, 3)
+    # il = KeyboardListener(stdscr)
+    # il.callbacks["w"] = lambda: coords.s()
+    # il.callbacks["s"] = lambda: coords.n()
+    # il.callbacks["a"] = lambda: coords.w()
+    # il.callbacks["d"] = lambda: coords.e()
+    # il.start()
+
+    c = Camera()
+    WorldManager.init(stdscr, c)
+
+    for y, row in enumerate(world_layout):
+        for x, obj in enumerate(row):
+            if obj == 1:
+                r = ro.Rock(x * ro.ROCK_SIZE, y * ro.ROCK_SIZE, stdscr)
+                WorldManager.add_object(r)
 
     stdscr.clear()
-
-    coords = Coords(3, 3)
-
-    il = KeyboardListener(stdscr)
-    il.callbacks["w"] = lambda: coords.s()
-    il.callbacks["s"] = lambda: coords.n()
-    il.callbacks["a"] = lambda: coords.w()
-    il.callbacks["d"] = lambda: coords.e()
-    il.start()
+    stdscr.refresh()
 
     while True:
-        stdscr.refresh()
-        stdscr.addch(coords.y, coords.x, "#")
+        WorldManager.draw()
 
 
 if __name__ == "__main__":
     _run_mypy()
     try:
-        curses.wrapper(example_draw_rectangle)
-    except (KeyboardInterrupt, Exception) as e:
-        logger.debug("stopping whole program")
-        if il is not None:
-            logger.debug("stopping input listener")
-            il.shutdown()
+        curses.wrapper(world_loop)
+    except Exception as e:
+        logger.debug("stopping game")
         curses.endwin()
+        if il:
+            logger.debug("stopping IL")
+            il.shutdown()
         raise
