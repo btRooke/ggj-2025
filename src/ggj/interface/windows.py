@@ -2,10 +2,10 @@ import curses
 import logging
 import time
 from curses import textpad
-from threading import Thread
 from typing import Any
 
 from . import InterfaceObject
+from ..item import Item
 
 logger = logging.getLogger(__name__)
 
@@ -97,17 +97,48 @@ class RightOptionsMenu(OptionsMenu):
 
 class LeftOptionsMenu(OptionsMenu):
 
-    def __init__(self, root: curses.window, world_viewer_width: int):
+    def __init__(
+        self,
+        root: curses.window,
+        world_viewer_width: int,
+        inventory: dict[Item, int],
+    ):
         options_space_width = (root.getmaxyx()[1] - world_viewer_width) / 2
         super().__init__(
             root,
             round((root.getmaxyx()[0] - OptionsMenu.HEIGHT) / 2),
             round(options_space_width / 2 - OptionsMenu.WIDTH / 2),
         )
-        self.options = {
-            "💸 Quids": 12,
-        }
         self._required_redraw = True
+        self.inventory = inventory
+        self.equipped: Item | None = None
+
+    def draw(self) -> None:
+
+        self._ww.move(0, 0)
+
+        # equipped tool
+
+        self._ww.addstr("🛠️  Equipped Tool\n", curses.A_BOLD)
+        self._ww.addstr(self.equipped.name if self.equipped else "None")
+        self._ww.addstr("\n\n")
+
+        if self.equipped:
+            assert "tool" in self.equipped.traits
+
+        # line
+
+        self._ww.addstr(("─" * (self._ww.getmaxyx()[1]) + "\n"))
+
+        # inventory
+
+        self._ww.addstr("Inventory\n", curses.A_BOLD)
+        for n, i in enumerate(self.inventory, start=1):
+            self._ww.addstr(f"{n}. {i.name} x {self.inventory[i]}")
+
+        self._w.border()
+        self._w.refresh()
+        self._ww.refresh()
 
 
 class WorldViewerBorder(InterfaceObject):

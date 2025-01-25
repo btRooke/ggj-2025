@@ -5,6 +5,8 @@ import time
 from curses import window
 from pathlib import Path
 from mypy import api
+
+from ggj.item import Item
 from .input import KeyboardListener
 from .world import terrain
 from .world import player
@@ -49,6 +51,13 @@ def _run_mypy() -> None:
 
 
 def world_loop(stdscr: window):
+
+    # inventory
+
+    inventory = {Item("Wooden Stick", traits=["tool"]): 1}
+
+    # curses stuff
+
     curses.use_default_colors()
     curses.start_color()
     curses.curs_set(False)
@@ -79,10 +88,11 @@ def world_loop(stdscr: window):
     # interface components
 
     diag_box = DialogueBox(stdscr, world_window.getmaxyx()[1])
+    inv_box = LeftOptionsMenu(stdscr, world_window.getmaxyx()[1], inventory)
     interface_components: list[InterfaceObject] = [
         WorldViewerBorder(stdscr, world_window),
         RightOptionsMenu(stdscr, world_window.getmaxyx()[1]),
-        LeftOptionsMenu(stdscr, world_window.getmaxyx()[1]),
+        inv_box,
         diag_box,
     ]
 
@@ -93,7 +103,7 @@ def world_loop(stdscr: window):
 
     def move(move_vector: tuple[int, int]):
         p.move(move_vector)
-        #world_window.erase()
+        # world_window.erase()
 
     il = KeyboardListener(stdscr)
     il.callbacks["a"] = lambda: move((-1, 0))
@@ -124,6 +134,7 @@ def world_loop(stdscr: window):
     )
 
     # main loop
+
     last_tick = 0.0
 
     while True:
