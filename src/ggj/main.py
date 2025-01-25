@@ -80,8 +80,7 @@ class Coords:
 
 
 def world_loop(stdscr: window):
-    # global il
-    #
+
     # coords = Coords(3, 3)
     # il = KeyboardListener(stdscr)
     # il.callbacks["w"] = lambda: coords.s()
