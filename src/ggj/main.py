@@ -9,8 +9,14 @@ from .input import KeyboardListener
 from .world import terrain
 from .world import player
 from .world.camera import Camera
+from .events import Events, Event
 from .interface import InterfaceObject
-from .interface.windows import WorldViewerBorder, RightOptionsMenu
+from .interface.windows import (
+    WorldViewerBorder,
+    RightOptionsMenu,
+    LeftOptionsMenu,
+    DialogueBox,
+)
 from .world.manager import WorldManager
 
 logging.basicConfig(
@@ -71,8 +77,8 @@ def world_loop(stdscr: window):
     world_window = curses.newwin(
         int(world_height),
         int(world_width),
-        int(max_height / 2 - world_height / 2),
-        int(max_width / 2 - world_width / 2),
+        int(max_height * 0.36 - world_height / 2),
+        int(max_width * 0.5 - world_width / 2),
     )
     WorldManager.init(world_window)
     assert WorldManager.screen is not None
@@ -86,11 +92,12 @@ def world_loop(stdscr: window):
 
     # interface components
 
+    diag_box = DialogueBox(stdscr, world_window.getmaxyx()[1])
     interface_components: list[InterfaceObject] = [
         WorldViewerBorder(stdscr, world_window),
         RightOptionsMenu(stdscr, world_window.getmaxyx()[1]),
-        # LeftOptions(stdscr),
-        # RightOptions(stdscr)
+        LeftOptionsMenu(stdscr, world_window.getmaxyx()[1]),
+        diag_box,
     ]
 
     Camera.move_camera((player_start_x, player_start_y))
@@ -119,6 +126,19 @@ def world_loop(stdscr: window):
     world_window.clear()
     world_window.refresh()
 
+    # events
+
+    events = Events(
+        [
+            Event(
+                2,
+                lambda: diag_box.write(
+                    'Mysterious voice: "Welcome to the world, time to plant some vegetables. I hope nothing bad happens..."'
+                ),
+            )
+        ]
+    )
+
     # main loop
     last_tick = 0.0
 
@@ -133,6 +153,7 @@ def world_loop(stdscr: window):
         last_tick = current_time
 
         il.check_input()
+        events.check()
 
 
 if __name__ == "__main__":

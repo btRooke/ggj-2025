@@ -1,10 +1,45 @@
 import curses
 import logging
+import time
 from curses import textpad
+from threading import Thread
+from typing import Any
 
 from . import InterfaceObject
 
 logger = logging.getLogger(__name__)
+
+
+class DialogueBox(InterfaceObject):
+
+    def draw(self) -> None:
+        self._w.border()
+        self._ww.move(0, 0)
+        self._w.refresh()
+
+    HEIGHT = 10
+
+    def __init__(self, root: curses.window, world_viewer_width: int):
+        super().__init__()
+        wh, ww = root.getmaxyx()
+        self._w = root.subwin(
+            self.HEIGHT,
+            world_viewer_width + 2,
+            round(wh * 0.818 - self.HEIGHT / 2),
+            round(ww / 2 - (world_viewer_width + 2) / 2),
+        )
+        self._ww = self._w.derwin(
+            self._w.getmaxyx()[0] - 2, self._w.getmaxyx()[1] - 4, 1, 2
+        )
+
+    def write(self, message: str):
+
+        self._ww.clear()
+        self._ww.move(0, 0)
+        for i in range(len(message)):
+            self._ww.addch(message[i])
+            self._ww.refresh()
+            time.sleep(0.028)
 
 
 class OptionsMenu(InterfaceObject):
@@ -15,14 +50,10 @@ class OptionsMenu(InterfaceObject):
     def __init__(self, parent: curses.window, i: int, j: int):
         super().__init__()
         self._w = parent.subwin(OptionsMenu.HEIGHT, OptionsMenu.WIDTH, i, j)
+        self.options: dict[str, Any] = {}
         self._ww = self._w.derwin(
             OptionsMenu.HEIGHT - 4, OptionsMenu.WIDTH - 8, 2, 4
         )
-        self.options = {
-            "🌾 Plants planted": 42,
-            "💸 Quids": 12,
-            "🐀 Rats killed": 1,
-        }
 
     def draw(self) -> None:
 
@@ -56,6 +87,27 @@ class RightOptionsMenu(OptionsMenu):
                 - OptionsMenu.WIDTH / 2
             ),
         )
+        self.options = {
+            "🌾 Plants planted": 42,
+            "💸 Quids": 12,
+            "🐛 Mutant Rats killed": 1,
+        }
+        self._required_redraw = True
+
+
+class LeftOptionsMenu(OptionsMenu):
+
+    def __init__(self, root: curses.window, world_viewer_width: int):
+        options_space_width = (root.getmaxyx()[1] - world_viewer_width) / 2
+        super().__init__(
+            root,
+            round((root.getmaxyx()[0] - OptionsMenu.HEIGHT) / 2),
+            round(options_space_width / 2 - OptionsMenu.WIDTH / 2),
+        )
+        self.options = {
+            "💸 Quids": 12,
+        }
+        self._required_redraw = True
 
 
 class WorldViewerBorder(InterfaceObject):
