@@ -21,14 +21,11 @@ logging.basicConfig(
     filename=LOG_NAME,
     level=logging.DEBUG,
 )
-il: Optional[KeyboardListener] = None  # TODO sort this out...
 logger = logging.getLogger(__name__)
 PACKAGE_ROOT = Path(__file__).parent.resolve()
 
 
-world_layout: list[list[int]] = [
-    [0, 1, 1]
-]
+world_layout: list[list[int]] = [[0, 1, 1]]
 
 
 def _run_mypy() -> None:
@@ -43,8 +40,8 @@ def _run_mypy() -> None:
     if code != 0:
         exit(code)
 
+
 def world_loop(stdscr: window):
-    global il
 
     WorldManager.init(stdscr)
 
@@ -54,7 +51,6 @@ def world_loop(stdscr: window):
 
     il = KeyboardListener(stdscr)
     il.callbacks["a"] = move
-    il.start()
 
     for y, row in enumerate(world_layout):
         for x, obj in enumerate(row):
@@ -67,6 +63,7 @@ def world_loop(stdscr: window):
 
     while True:
         WorldManager.draw()
+        il.check_input()
 
 
 if __name__ == "__main__":
@@ -74,8 +71,5 @@ if __name__ == "__main__":
     try:
         curses.wrapper(world_loop)
     except (KeyboardInterrupt, Exception) as e:
-        if il is not None:
-            logger.debug("stopping IL")
-            il.shutdown()
         logger.debug("stopping game")
         raise
