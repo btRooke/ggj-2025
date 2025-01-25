@@ -38,10 +38,10 @@ def world_char(win: window, start_x: int, start_y: int, char: str, colour: int =
     screen_x = start_x - cam_x
     screen_y = start_y - cam_y
 
-    if screen_x < 0 or screen_x >= max_width:
+    if screen_x < 0 or screen_x >= max_width - 1:
         return
 
-    if screen_y < 0 or screen_y >= max_height:
+    if screen_y < 0 or screen_y >= max_height - 1:
         return
 
 
