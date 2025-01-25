@@ -5,7 +5,6 @@ import time
 from curses import window
 from pathlib import Path
 from mypy import api
-
 from .item import Item
 from .input import KeyboardListener
 from .world import terrain
@@ -30,8 +29,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 PACKAGE_ROOT = Path(__file__).parent.resolve()
-TICK_FREQUENCY = 10
 
+GAME_TICK_FREQUENCY = 30
+EVENT_TICK_FREQUENCY = 10
 
 world_layout: list[list[int]] = [
     [i in {0, 49} or x in {0, 49} for i in range(0, 50)] for x in range(0, 50)
@@ -132,6 +132,7 @@ def world_loop(stdscr: window):
     )
     # main loop
     last_tick = 0.0
+    last_game_tick = 0.0
 
     while True:
         WorldManager.draw()
@@ -139,8 +140,13 @@ def world_loop(stdscr: window):
             c.update()
 
         current_time = time.monotonic()
-        if (time.monotonic() - last_tick) < (1 / TICK_FREQUENCY):
+
+        if (time.monotonic() - last_game_tick) > (1 / GAME_TICK_FREQUENCY):
+            WorldManager.update()
+
+        if (time.monotonic() - last_tick) < (1 / EVENT_TICK_FREQUENCY):
             continue
+
         last_tick = current_time
 
         il.check_input()

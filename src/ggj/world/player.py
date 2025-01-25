@@ -71,7 +71,7 @@ class Player(Collidable):
             Camera.move_camera(move_vector)
 
     def impassable(self) -> bool:
-        return False
+        return True
 
     def on_collide(self, object: GameObject):
         pass

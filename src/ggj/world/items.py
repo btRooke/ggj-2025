@@ -1,4 +1,3 @@
-from curses import window
 from .gameobject import Wiedable
 from .player import Player
 from .manager import WorldManager

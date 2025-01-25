@@ -33,7 +33,6 @@ class DialogueBox(InterfaceObject):
         )
 
     def write(self, message: str):
-
         self._ww.clear()
         self._ww.move(0, 0)
         for i in range(len(message)):
