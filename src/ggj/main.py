@@ -1,11 +1,24 @@
-import sys
-from pathlib import Path
-from mypy import api
 import curses
+import datetime
+import logging
+import sys
 from curses import window
-from .drawing import shape as s
+from pathlib import Path
+from typing import Optional
 
+from mypy import api
+
+from .input import KeyboardListener
+
+logging.basicConfig(
+    format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
+    filename=f"{datetime.datetime.now()}.log",
+    level=logging.DEBUG,
+)
+il: Optional[KeyboardListener] = None  # TODO sort this out...
+logger = logging.getLogger(__name__)
 PACKAGE_ROOT = Path(__file__).parent.resolve()
+
 
 def _run_mypy() -> None:
     """
@@ -19,18 +32,53 @@ def _run_mypy() -> None:
     if code != 0:
         exit(code)
 
+
+class Coords:
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def n(self):
+        self.y += 1
+
+    def e(self):
+        self.x += 1
+
+    def s(self):
+        self.y -= 1
+
+    def w(self):
+        self.x -= 1
+
+
 def example_draw_rectangle(stdscr: window):
+    global il
+
     stdscr.clear()
-    stdscr.refresh()
+
+    coords = Coords(3, 3)
+
+    il = KeyboardListener(stdscr)
+    il.callbacks["w"] = lambda: coords.s()
+    il.callbacks["s"] = lambda: coords.n()
+    il.callbacks["a"] = lambda: coords.w()
+    il.callbacks["d"] = lambda: coords.e()
+    il.start()
 
     while True:
-        stdscr.refresh ()
-        s.rect (stdscr, 1, 10, 20, 20)
+        stdscr.refresh()
+        stdscr.addch(coords.y, coords.x, "#")
+
 
 if __name__ == "__main__":
     _run_mypy()
     try:
-        curses.wrapper (example_draw_rectangle)
-    except Exception as e:
+        curses.wrapper(example_draw_rectangle)
+    except (KeyboardInterrupt, Exception) as e:
+        logger.debug("stopping whole program")
+        if il is not None:
+            logger.debug("stopping input listener")
+            il.shutdown()
         curses.endwin()
         raise
