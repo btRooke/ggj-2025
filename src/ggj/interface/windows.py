@@ -15,14 +15,27 @@ class OptionsMenu(InterfaceObject):
     def __init__(self, parent: curses.window, i: int, j: int):
         super().__init__()
         self._w = parent.subwin(OptionsMenu.HEIGHT, OptionsMenu.WIDTH, i, j)
-        self.options = {"plants": 42}
+        self._ww = self._w.derwin(
+            OptionsMenu.HEIGHT - 4, OptionsMenu.WIDTH - 8, 2, 4
+        )
+        self.options = {"Plants planted": 42, "Quids": 12, "Rats killed": 1}
 
     def draw(self) -> None:
-        h, w = self._w.getmaxyx()
-        textpad.rectangle(self._w, 0, 0, h - 2, w - 2)
-        for o in self.options:
-            self._w.addstr(1, 1, "hello!")
+
+        self._ww.move(0, 0)
+
+        for i, k in enumerate(self.options):
+
+            if i != 0:
+                self._ww.addstr("\n\n")
+
+            self._ww.addstr(k, curses.A_BOLD)
+            self._ww.addstr("\n")
+            self._ww.addstr(str(self.options[k]))
+
+        self._w.border()
         self._w.refresh()
+        self._ww.refresh()
 
 
 class RightOptionsMenu(OptionsMenu):
