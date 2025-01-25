@@ -3,7 +3,6 @@ from ..drawing import shape as s
 from .manager import WorldManager
 from .gameobject import GameObject
 from .player import Player
-import logging
 import random
 import time
 
@@ -205,5 +204,4 @@ class TerrainFactory:
                     raise Exception ("terrain tile does not exist")
 
                 obj: GameObject = terrain_map[cell](x, y)
-                logging.debug(obj)
                 WorldManager.add_object(obj)
