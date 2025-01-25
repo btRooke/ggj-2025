@@ -30,8 +30,8 @@ class WorldManager:
 
         textpad.rectangle(
             WorldManager.screen,
-            1,
-            1,
+            0,
+            0,
             max[0] - 2,
             max[1] - 2,
         )
