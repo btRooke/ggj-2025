@@ -62,25 +62,6 @@ def _run_mypy() -> None:
     if code != 0:
         exit(code)
 
-
-class Coords:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def n(self):
-        self.y += 1
-
-    def e(self):
-        self.x += 1
-
-    def s(self):
-        self.y -= 1
-
-    def w(self):
-        self.x -= 1
-
-
 def world_loop(stdscr: window):
     global il
 
