@@ -1,7 +1,7 @@
 from curses import window
 from ..drawing import shape as s
 
-class Rock:
+class Grass:
     def __init__(self, x: int, y: int, win: window):
         self.window = win
         self.pos = [x, y]
@@ -18,6 +18,9 @@ class Rock:
 
     def zindex(self) -> int:
         return 0
+
+    def impassable(self) -> bool:
+        return False
 
 class Boundary:
     def __init__(self, x: int, y: int, win: window):
@@ -36,3 +39,6 @@ class Boundary:
 
     def zindex(self) -> int:
         return 0
+
+    def impassable(self) -> bool:
+        return True

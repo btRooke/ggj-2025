@@ -51,7 +51,7 @@ def generate_world(screen: window):
     for y in range(LIM_Y):
         for x in range(LIM_X):
             if offset <= x < LIM_X - offset and offset <= y < LIM_Y - offset:
-                WorldManager.add_object(terrain.Rock(x, y, screen))
+                WorldManager.add_object(terrain.Grass(x, y, screen))
 
             else:
                 WorldManager.add_object(terrain.Boundary(x, y, screen))

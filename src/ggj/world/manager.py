@@ -1,4 +1,4 @@
-from typing import ClassVar, Optional, Dict
+from typing import ClassVar, Optional, Dict, Iterable
 from curses import window, textpad
 from .gameobject import GameObject
 from .camera import Camera
@@ -39,7 +39,15 @@ class WorldManager:
             for obj in objs:
                 obj.draw()
 
-
     @staticmethod
     def init(screen: window):
         WorldManager.screen = screen
+
+    """
+    Determine if the given square is 'placeable'. Meaning that
+    an object can be put on the square or the player can move
+    to the square.
+    """
+    @staticmethod
+    def can_place(x: int, y: int) -> int:
+        return len(list(filter(lambda o: o.get_pos() == (x, y) and o.impassable(), WorldManager.objects))) == 0

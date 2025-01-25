@@ -1,10 +1,12 @@
 from curses import window
 from ..drawing import shape as s
 from .camera import Camera
+from .gameobject import Collidable, GameObject
+from .manager import WorldManager
 
 MOVE_CAMERA_COLS = 5
 
-class Player:
+class Player(Collidable):
     def __init__(self, x: int, y: int, win: window):
         self.window = win
         self.pos: list[int] = [x, y]
@@ -24,8 +26,15 @@ class Player:
 
     def move(self, move_vector: tuple[int, int]):
         x, y = move_vector
-        self.pos[0] += x
-        self.pos[1] += y
+
+        new_pos_x = self.pos[0] + x
+        new_pos_y = self.pos[1] + y
+
+        if not WorldManager.can_place(new_pos_x, new_pos_y):
+            return
+
+        self.pos[0] = new_pos_x
+        self.pos[1] = new_pos_y
 
         player_x, player_y = self.get_pos()
         cam_x, cam_y = Camera.get_pos()
@@ -37,3 +46,9 @@ class Player:
         # out of bounding box
         if x_exceeded or y_exceeded:
             Camera.move_camera(move_vector)
+
+    def impassable(self) -> bool: 
+        return False
+
+    def on_collide(self, object: GameObject):
+        pass

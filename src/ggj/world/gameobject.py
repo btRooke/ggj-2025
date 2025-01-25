@@ -11,3 +11,15 @@ class GameObject(Protocol):
     The lower the z-index the higher priority
     """
     def zindex(self) -> int: ...
+    """
+    Returns True if chracters cannot move through the object
+    """
+    def impassable(self) -> bool: ...
+
+class Collidable():
+    """
+    When two objects are on the same tile they are said to be
+    colliding. This callback gets fired when they both
+    collide.
+    """
+    def on_collide(self, object: GameObject): ...
