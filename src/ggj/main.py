@@ -7,6 +7,8 @@ from mypy import api
 from .input import KeyboardListener
 from .world import terrain
 from .world.camera import Camera
+from .interface import InterfaceObject
+from .interface.windows import WorldViewerBorder, RightOptionsMenu
 from .world.manager import WorldManager
 
 logging.basicConfig(
@@ -35,8 +37,10 @@ def _run_mypy() -> None:
     if code != 0:
         exit(code)
 
+
 LIM_X: int = 150
 LIM_Y: int = 100
+
 
 def generate_world(screen: window):
     offset = 10
@@ -72,9 +76,18 @@ def world_loop(stdscr: window):
     logger.info(f"whole screen beginning y/x {stdscr.getbegyx()}")
     logger.info(f"whole screen dims y/x {stdscr.getmaxyx()}")
     logger.info(f"world beginning y/x {WorldManager.screen.getbegyx()}")
-    logger.info(f"whole screen y/x {WorldManager.screen.getmaxyx()}")
+    logger.info(f"world screen y/x {WorldManager.screen.getmaxyx()}")
 
     Camera.move_camera((int(LIM_X / 2), int(LIM_Y / 2)))
+
+    # interface components
+
+    interface_components: list[InterfaceObject] = [
+        WorldViewerBorder(stdscr, world_window),
+        RightOptionsMenu(stdscr, world_window.getmaxyx()[1]),
+        # LeftOptions(stdscr),
+        # RightOptions(stdscr)
+    ]
 
     # hook up movement
 
@@ -103,6 +116,8 @@ def world_loop(stdscr: window):
 
     while True:
         WorldManager.draw()
+        for c in interface_components:
+            c.update()
         il.check_input()
 
 

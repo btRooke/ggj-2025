@@ -26,16 +26,6 @@ class WorldManager:
 
         WorldManager.screen.refresh()
 
-        max = WorldManager.screen.getmaxyx()
-
-        textpad.rectangle(
-            WorldManager.screen,
-            0,
-            0,
-            max[0] - 2,
-            max[1] - 2,
-        )
-
         for obj in WorldManager.objects:
             obj.draw()
 
