@@ -1,5 +1,4 @@
 import curses
-import datetime
 import logging
 import sys
 from curses import window
@@ -38,10 +37,9 @@ def _run_mypy() -> None:
 
 
 def generate_world(screen: window):
-    lim_x = 125
-    lim_y = 40
-
-    offset = 2
+    lim_x = 150
+    lim_y = 100
+    offset = 10
 
     for y in range(lim_y):
         for x in range(lim_x):
@@ -90,6 +88,7 @@ def world_loop(stdscr: window):
     il.callbacks["w"] = lambda: move((0, 1))
 
     # put rocks in
+    world_window.nodelay(True)
 
     generate_world(world_window)
 

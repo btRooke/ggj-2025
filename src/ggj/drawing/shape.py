@@ -35,7 +35,7 @@ def world_char(win: window, start_x: int, start_y: int, char: str, colour: int =
 
     max_height, max_width = win.getmaxyx()
 
-    screen_x = start_x - cam_x
+    screen_x = (start_x - cam_x) * 2
     screen_y = start_y - cam_y
 
     if screen_x < 0 or screen_x >= max_width - 1:
