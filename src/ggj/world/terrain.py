@@ -68,6 +68,69 @@ class Water:
     def impassable(self) -> bool:
         return True
 
+class Soil:
+    def __init__(self, x: int, y: int, win: window):
+        self.window = win
+        self.pos = [x, y]
+
+    def update(self):
+        pass
+
+    def draw(self):
+        x, y = self.pos
+        s.world_char(self.window, x, y, '!', s.LIGHT_BROWN)
+
+    def get_pos(self) -> tuple[int, int]:
+        return self.pos[0], self.pos[1]
+
+    def zindex(self) -> int:
+        return 0
+
+    def impassable(self) -> bool:
+        return True
+
+class PlantedSoil:
+    def __init__(self, x: int, y: int, win: window):
+        self.window = win
+        self.pos = [x, y]
+
+    def update(self):
+        pass
+
+    def draw(self):
+        x, y = self.pos
+        s.world_char(self.window, x, y, '`', s.LIGHT_YELLOW)
+
+    def get_pos(self) -> tuple[int, int]:
+        return self.pos[0], self.pos[1]
+
+    def zindex(self) -> int:
+        return 0
+
+    def impassable(self) -> bool:
+        return True
+
+class Wheat:
+    def __init__(self, x: int, y: int, win: window):
+        self.window = win
+        self.pos = [x, y]
+
+    def update(self):
+        pass
+
+    def draw(self):
+        x, y = self.pos
+        s.world_char(self.window, x, y, '$', s.GOLDEN)
+
+    def get_pos(self) -> tuple[int, int]:
+        return self.pos[0], self.pos[1]
+
+    def zindex(self) -> int:
+        return 0
+
+    def impassable(self) -> bool:
+        return True
+
 class TerrainFactory:
     @staticmethod
     def create_terrain(world: list[list[str]], win: window):
@@ -75,6 +138,9 @@ class TerrainFactory:
             ';': Grass,
             '♠': Boundary,
             '~': Water,
+            '!': Soil,
+            '^': PlantedSoil,
+            '$': Wheat,
         }
 
         for y, row in enumerate(world):

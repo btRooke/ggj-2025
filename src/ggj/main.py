@@ -93,7 +93,7 @@ def world_loop(stdscr: window):
 
     def move(move_vector: tuple[int, int]):
         p.move(move_vector)
-        world_window.erase()
+        #world_window.erase()
 
     il = KeyboardListener(stdscr)
     il.callbacks["a"] = lambda: move((-1, 0))

@@ -1,6 +1,5 @@
 import curses
 import curses.textpad as text
-import logging
 from curses import window
 from ..world.camera import Camera
 import logging
@@ -9,15 +8,14 @@ GREEN=108
 DARK_GREEN=22
 DARK_RED=88
 DEEP_BLUE=21
-
-logger = logging.getLogger(__name__)
-
+LIGHT_BROWN=136
+LIGHT_YELLOW=184
+GOLDEN=178
 
 def rect(
     win: window, start_x: int, start_y: int, end_x: int, end_y: int
 ) -> None:
     text.rectangle(win, start_y, start_x, end_y, end_x)
-
 
 def world_rect(win: window, start_x: int, start_y: int, end_x: int, end_y: int):
     cam_x, cam_y = Camera.get_pos()
