@@ -80,7 +80,7 @@ def world_loop(stdscr: window):
 
     def move(move_vector: tuple[int, int]):
         Camera.move_camera(move_vector)
-        world_window.clear()
+        world_window.erase()
 
     il = KeyboardListener(stdscr)
     il.callbacks["a"] = lambda: move((1, 0))
