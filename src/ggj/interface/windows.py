@@ -5,7 +5,8 @@ from curses import textpad
 from typing import Any
 
 from . import InterfaceObject
-from ..item import Item
+from ..world.item import Item
+from ..world.player import PlayerInventory
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +102,7 @@ class LeftOptionsMenu(OptionsMenu):
         self,
         root: curses.window,
         world_viewer_width: int,
-        inventory: dict[Item, int],
+        inventory: PlayerInventory,
     ):
         options_space_width = (root.getmaxyx()[1] - world_viewer_width) / 2
         super().__init__(
@@ -109,9 +110,8 @@ class LeftOptionsMenu(OptionsMenu):
             round((root.getmaxyx()[0] - OptionsMenu.HEIGHT) / 2),
             round(options_space_width / 2 - OptionsMenu.WIDTH / 2),
         )
-        self._required_redraw = True
         self.inventory = inventory
-        self.equipped: Item | None = None
+        self._required_redraw = True
 
     def draw(self) -> None:
 
@@ -120,11 +120,15 @@ class LeftOptionsMenu(OptionsMenu):
         # equipped tool
 
         self._ww.addstr("🛠️  Equipped Tool\n", curses.A_BOLD)
-        self._ww.addstr(self.equipped.name if self.equipped else "None")
+        self._ww.addstr(
+            self.inventory.active_item.name
+            if self.inventory.active_item
+            else "None"
+        )
         self._ww.addstr("\n\n")
 
-        if self.equipped:
-            assert "tool" in self.equipped.traits
+        if self.inventory.active_item:
+            assert "wieldable" in self.inventory.active_item.traits
 
         # line
 
@@ -133,8 +137,8 @@ class LeftOptionsMenu(OptionsMenu):
         # inventory
 
         self._ww.addstr("Inventory\n", curses.A_BOLD)
-        for n, i in enumerate(self.inventory, start=1):
-            self._ww.addstr(f"{n}. {i.name} x {self.inventory[i]}")
+        for n, i in enumerate(self.inventory.inventory, start=1):
+            self._ww.addstr(f"{n}. {i.name} x {self.inventory.inventory[i]}\n")
 
         self._w.border()
         self._w.refresh()

@@ -6,7 +6,7 @@ from curses import window
 from pathlib import Path
 from mypy import api
 
-from .item import Item
+from ggj.world.item import SHOVEL, Item
 from .input import KeyboardListener
 from .world import terrain
 from .world import player
@@ -21,12 +21,11 @@ from .interface.windows import (
 )
 from .world.manager import WorldManager
 from .world.tiles import WORLD_TILES
-from .world.items import Shovel
 
 logging.basicConfig(
     format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
     filename="ggj.log",
-    level=logging.DEBUG,
+    level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
 PACKAGE_ROOT = Path(__file__).parent.resolve()
@@ -52,8 +51,7 @@ def _run_mypy() -> None:
 
 
 def world_loop(stdscr: window):
-    # inventory
-    inventory = {Item("Wooden Stick", traits=["tool"]): 1}
+
     # curses stuff
 
     curses.use_default_colors()
@@ -83,10 +81,17 @@ def world_loop(stdscr: window):
 
     player_start_x = int(len(WORLD_TILES[0]) / 2)
     player_start_y = int(len(WORLD_TILES[1]) / 2)
+
+    Camera.move_camera((player_start_x, player_start_y))
+
+    # hook up movement
+    p = player.Player(player_start_x, player_start_y)
+    WorldManager.add_object(p)
+
     # interface components
 
     diag_box = DialogueBox(stdscr, world_window.getmaxyx()[1])
-    inv_box = LeftOptionsMenu(stdscr, world_window.getmaxyx()[1], inventory)
+    inv_box = LeftOptionsMenu(stdscr, world_window.getmaxyx()[1], p.inventory)
     interface_components: list[InterfaceObject] = [
         WorldViewerBorder(stdscr, world_window),
         RightOptionsMenu(stdscr, world_window.getmaxyx()[1]),
@@ -94,14 +99,12 @@ def world_loop(stdscr: window):
         diag_box,
     ]
 
-    Camera.move_camera((player_start_x, player_start_y))
-    # hook up movement
-    p = player.Player(player_start_x, player_start_y)
-    p.pickup(Shovel(p))
-    WorldManager.add_object(p)
-
     def move(move_vector: tuple[int, int]):
         p.move(move_vector)
+
+    def swap_item():
+        p.inventory.next_active()
+        inv_box._required_redraw = True
 
     il = KeyboardListener(stdscr)
     il.callbacks["a"] = lambda: move((-1, 0))
@@ -109,6 +112,7 @@ def world_loop(stdscr: window):
     il.callbacks["s"] = lambda: move((0, 1))
     il.callbacks["w"] = lambda: move((0, -1))
     il.callbacks["x"] = lambda: p.execute()
+    il.callbacks["e"] = swap_item
 
     # put rocks in
     world_window.nodelay(True)

@@ -1,39 +1,67 @@
 import curses
-from curses import window
-from ..drawing import shape as s
+import logging
+from dataclasses import dataclass, field
+from typing import Optional
+
 from .camera import Camera
-from .gameobject import Collidable, GameObject, Wiedable
+from .gameobject import Collidable, GameObject
+from .item import Item, SHOVEL, WOODEN_STICK
 from .manager import WorldManager
+from .terrain import Hole
+from ..drawing import shape as s
 
 MOVE_CAMERA_COLS = 5
+logger = logging.getLogger(__name__)
 
-class Inventory:
-    def __init__(self):
-        self.inventory: list[Wiedable] = []
-        self.active_idx = 0
 
-    def set_active_idx(self, idx: int):
-        self.active_idx = idx
+@dataclass
+class PlayerInventory:
+    inventory: dict[Item, int] = field(default_factory=dict)
+    active_item: Optional[Item] = None
 
-    def length(self) -> int:
-        return len(self.inventory)
+    def next_active(self) -> None:
+        items: list[Item] = sorted(self.inventory, key=lambda x: x.name)
+        if self.active_item is None:
+            if len(items) == 0:
+                return
+            else:
+                self.active_item = items[0]
+                return
+        current_index = None
+        for i in range(len(items)):
+            if items[i].name == self.active_item.name:
+                current_index = i
+                break
+        assert current_index is not None
+        next_item_name = items[(current_index + 1) % len(items)].name
+        next_item = [i for i in self.inventory if i.name == next_item_name]
+        assert len(next_item) == 1
+        logger.info(f"switching to {next_item}")
+        self.active_item = next_item[0]
 
-    def get_items(self) -> list[Wiedable]:
-        return list(self.inventory)
-
-    def get_active(self) -> Wiedable:
-        return self.inventory[self.active_idx]
-
-    def add(self, wiedable: Wiedable):
-        self.inventory.append(wiedable)
 
 class Player(Collidable):
     def __init__(self, x: int, y: int):
         self.pos: list[int] = [x, y]
-        self.inventory = Inventory()
+
+        # inventory
+
+        self.inventory = PlayerInventory()
+        self.inventory.inventory[SHOVEL] = 1
+        self.inventory.inventory[WOODEN_STICK] = 1
+        self.inventory.active_item = SHOVEL
+
+        # item actions
+
+        self.item_actions = {SHOVEL: self.dig}
 
     def update(self):
         pass
+
+    def dig(self):
+        x, y = self.get_pos()
+        WorldManager.clear_cell(x, y)
+        WorldManager.add_object(Hole(x, y))
 
     def draw(self):
         assert WorldManager.screen
@@ -77,7 +105,18 @@ class Player(Collidable):
         pass
 
     def execute(self):
-        self.inventory.get_active().execute()
+        if (
+            self.inventory.active_item
+            and self.inventory.active_item in self.item_actions
+        ):
+            assert (
+                self.inventory.active_item in self.inventory.inventory
+                and self.inventory.inventory[self.inventory.active_item] > 0
+            )
+            self.item_actions[self.inventory.active_item]()
 
-    def pickup(self, wiedable: Wiedable):
-        self.inventory.add(wiedable)
+    def pickup(self, item: Item):
+        if item in self.inventory.inventory:
+            self.inventory.inventory[item] += 1
+        else:
+            self.inventory.inventory[item] = 1

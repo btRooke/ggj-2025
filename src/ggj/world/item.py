@@ -8,3 +8,7 @@ class Item:
 
     def __hash__(self):
         return hash(str)
+
+
+SHOVEL = Item("Shovel", ["wieldable"])
+WOODEN_STICK = Item("Wooden Stick", ["wieldable"])
