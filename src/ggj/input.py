@@ -13,7 +13,7 @@ class KeyboardListener(Thread):
         self.callbacks: dict = {}
         self._w = w
         self._running = True
-        self._w.timeout(500)  # ms
+        self._w.timeout(25)  # ms
 
     @override
     def run(self):

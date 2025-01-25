@@ -4,15 +4,24 @@ from ..world.camera import Camera
 
 def rect(win: window, start_x: int, start_y: int, end_x: int,\
         end_y: int) -> None:
-    text.rectangle (win, start_x, start_y, end_x, end_y)
+    text.rectangle (win, start_y, start_x, end_y, end_x)
 
 def world_rect(win: window, start_x: int, start_y: int, end_x: int,\
                     end_y: int):
     cam_x, cam_y = Camera.get_pos()
 
+    max_height, max_width = win.getmaxyx()
+
     screen_start_x = max(0, start_x - cam_x)
+    screen_start_x = min(max_width, screen_start_x)
+
     screen_start_y = max(0, start_y - cam_y)
+    screen_start_y = min(max_height, screen_start_y)
+
     screen_end_x = max(0, end_x - cam_x)
+    screen_end_x = min(max_width, screen_end_x)
+
     screen_end_y = max(0, end_y - cam_y)
+    screen_end_y = min(max_height, screen_end_y)
 
     rect(win, screen_start_x, screen_start_y, screen_end_x, screen_end_y)

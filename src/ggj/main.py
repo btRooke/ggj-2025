@@ -27,26 +27,7 @@ PACKAGE_ROOT = Path(__file__).parent.resolve()
 
 
 world_layout: list[list[int]] = [
-    [0, 1, 1, 0, 0, 0, 0, 1],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 1],
-    [0, 0, 0, 1, 1, 1, 0, 0],
-    [0, 1, 1, 0, 0, 0, 0, 0],
-    [0, 1, 1, 0, 0, 0, 0, 1],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 1],
-    [0, 0, 0, 1, 1, 1, 0, 0],
-    [0, 1, 1, 0, 0, 0, 0, 0],
-    [0, 1, 1, 0, 0, 0, 0, 1],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 1],
-    [0, 0, 0, 1, 1, 1, 0, 0],
-    [0, 1, 1, 0, 0, 0, 0, 0],
-    [0, 1, 1, 0, 0, 0, 0, 1],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 1],
-    [0, 0, 0, 1, 1, 1, 0, 0],
-    [0, 1, 1, 0, 0, 0, 0, 0],
+    [0, 1, 1]
 ]
 
 
@@ -67,8 +48,12 @@ def world_loop(stdscr: window):
 
     WorldManager.init(stdscr)
 
+    def move():
+        Camera.move_camera((-1, 0))
+        stdscr.clear()
+
     il = KeyboardListener(stdscr)
-    il.callbacks["a"] = lambda: Camera.move_camera((-1, 0))
+    il.callbacks["a"] = move
     il.start()
 
     for y, row in enumerate(world_layout):
@@ -93,5 +78,4 @@ if __name__ == "__main__":
             logger.debug("stopping IL")
             il.shutdown()
         logger.debug("stopping game")
-        curses.endwin()
         raise
