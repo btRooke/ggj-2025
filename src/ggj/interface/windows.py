@@ -18,7 +18,11 @@ class OptionsMenu(InterfaceObject):
         self._ww = self._w.derwin(
             OptionsMenu.HEIGHT - 4, OptionsMenu.WIDTH - 8, 2, 4
         )
-        self.options = {"Plants planted": 42, "Quids": 12, "Rats killed": 1}
+        self.options = {
+            "🌾 Plants planted": 42,
+            "💸 Quids": 12,
+            "🐀 Rats killed": 1,
+        }
 
     def draw(self) -> None:
 

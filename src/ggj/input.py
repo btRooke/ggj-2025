@@ -15,11 +15,12 @@ class KeyboardListener:
 
     def check_input(self):
 
-        while True:
-            raw_char = self._w.getch()
-            if raw_char == curses.ERR:
-                break
-            c = chr(raw_char)
-            logger.debug(f"got char {c}")
-            if c in self.callbacks:
-                self.callbacks[c]()
+        raw_char = self._w.getch()
+        if raw_char == curses.ERR:
+            return
+        c = chr(raw_char)
+        logger.debug(f"got char {c}")
+        if c in self.callbacks:
+            self.callbacks[c]()
+        while self._w.getch() != curses.ERR:
+            pass

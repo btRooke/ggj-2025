@@ -1,6 +1,7 @@
 import curses
 import logging
 import sys
+import time
 from curses import window
 from pathlib import Path
 from mypy import api
@@ -15,10 +16,11 @@ from .world.manager import WorldManager
 logging.basicConfig(
     format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
     filename="ggj.log",
-    level=logging.DEBUG,
+    level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
 PACKAGE_ROOT = Path(__file__).parent.resolve()
+TICK_FREQUENCY = 10
 
 
 world_layout: list[list[int]] = [
@@ -118,11 +120,20 @@ def world_loop(stdscr: window):
     world_window.refresh()
 
     # main loop
+    last_tick = 0.0
+
     while True:
         WorldManager.draw()
         for c in interface_components:
             c.update()
+
+        current_time = time.monotonic()
+        if (time.monotonic() - last_tick) < (1 / TICK_FREQUENCY):
+            continue
+        last_tick = current_time
+
         il.check_input()
+
 
 if __name__ == "__main__":
     _run_mypy()
