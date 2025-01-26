@@ -71,4 +71,5 @@ class Farmer(NPC):
             (25, 25),
             trades=[(WHEAT, QUID)],
             inventory={QUID: 1_000_000},
+            trade_as_buyer="Pfft - like you'd have anything decent to sell. Let's see anyway...",
         )
