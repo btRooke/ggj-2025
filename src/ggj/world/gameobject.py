@@ -27,14 +27,6 @@ class Collidable():
     """
     def on_collide(self, object: GameObject): ...
 
-class Wiedable():
-    """
-    Objects that implement this can be picked up and perform an 'action'.
-    Examples of wiedable items may be a scythe or a shovel.
-    """
-    def execute(self): ...
-
-
 class GameObjectUtils:
     @staticmethod
     def distance(obj1: GameObject, obj2: GameObject) -> float:

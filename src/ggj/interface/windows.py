@@ -264,7 +264,6 @@ class WorldViewerBorder(InterfaceObject):
                     self._required_redraw = True
 
             # if not and still red, go to white
-
             elif self.direction_colours[direction] == curses.COLOR_RED:
                 self.direction_colours[direction] = curses.COLOR_WHITE
                 self._required_redraw = True

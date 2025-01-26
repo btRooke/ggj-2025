@@ -66,3 +66,33 @@ def world_char(
         return
 
     win.addch(screen_y, screen_x, char, curses.color_pair(colour))
+
+def in_bounds(win: window, x: int, y: int) -> bool:
+    cam_x, cam_y = Camera.get_pos()
+    viewport, _ = win.getmaxyx()
+    return abs(x - cam_x) * 2 < viewport / 2 and abs(y - cam_y) < viewport / 2
+
+def get_direction(win: window, x: int, y: int) -> set[str]:
+    c_x, c_y = Camera.get_pos()
+    viewport, _ = win.getmaxyx()
+
+    top_cam_y = c_y - (viewport / 2)
+    bottom_cam_y = c_y + (viewport / 2)
+    left_cam_x = c_x - (viewport / 4)
+    right_cam_x = c_x + (viewport / 4)
+
+    directions: set[str] = set()
+
+    if y < top_cam_y:
+        directions.add('n')
+
+    if y > bottom_cam_y:
+        directions.add('s')
+
+    if x < left_cam_x:
+        directions.add('w')
+
+    if x > right_cam_x:
+        directions.add('e')
+
+    return directions

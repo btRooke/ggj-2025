@@ -1,17 +1,11 @@
-from typing import ClassVar, Optional, Dict, Type, Set, Callable
+from typing import ClassVar, Optional, Type, Set
 from curses import window
 from .gameobject import GameObject, Collidable
 from .camera import Camera
 import logging
+from ..drawing import shape as s
 
 logger = logging.getLogger(__name__)
-
-def is_visible(o: GameObject):
-    assert WorldManager.screen
-    pos_x, pos_y = o.get_pos()
-    cam_x, cam_y = Camera.get_pos()
-    viewport, _ = WorldManager.screen.getmaxyx()
-    return abs(pos_x - cam_x) < viewport / 2 and abs(pos_y - cam_y) < viewport / 2
 
 class WorldManager:
     objects: ClassVar[dict[tuple[int, int], list[GameObject]]] = dict()
@@ -29,7 +23,7 @@ class WorldManager:
 
         WorldManager._process_collisions()
 
-        for pos, objs in WorldManager.objects.items():
+        for _, objs in WorldManager.objects.items():
             for obj in objs:
                 obj.update()
 
@@ -43,7 +37,7 @@ class WorldManager:
         coord_dict = WorldManager._group_by_position()
 
         for pos_x, pos_y in coord_dict.keys():
-            collidables = list((o for o in coord_dict[(pos_x, pos_y)] if isinstance(o, Collidable)))
+            collidables = [o for o in coord_dict[(pos_x, pos_y)] if isinstance(o, Collidable)]
             all_objects = coord_dict[(pos_x, pos_y)]
 
             if len(collidables) == 0:
@@ -132,8 +126,12 @@ class WorldManager:
 
     @staticmethod
     def get_visible_objects() -> list[GameObject]:
-        return list((o for o in WorldManager.get_all_objects() if is_visible(o)))
+        assert WorldManager.screen
+        return list((o for o in WorldManager.get_all_objects()\
+                if s.in_bounds(WorldManager.screen, *o.get_pos())))
 
     @staticmethod
     def get_out_of_sight_objects() -> list[GameObject]:
-        return list((o for o in WorldManager.get_all_objects() if not is_visible(o)))
+        assert WorldManager.screen
+        return list((o for o in WorldManager.get_all_objects()\
+                if not s.in_bounds(WorldManager.screen, *o.get_pos())))

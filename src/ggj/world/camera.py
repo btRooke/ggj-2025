@@ -23,4 +23,4 @@ class Camera:
     def move_camera(mov_vec: tuple[int, int]):
         x, y = mov_vec
         Camera.pos[0] += x
-        Camera.pos[1] += y
+        Camera.pos[1] += y 

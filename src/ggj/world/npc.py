@@ -1,5 +1,4 @@
 import curses
-from abc import ABC
 
 from .gameobject import GameObject
 from .item import Item, QUID, WHEAT
@@ -7,7 +6,7 @@ from .manager import WorldManager
 from ..drawing import shape as s
 
 
-class NPC(ABC, GameObject):
+class NPC(GameObject):
 
     def __init__(
         self,
@@ -61,7 +60,6 @@ class NPC(ABC, GameObject):
 
 
 class Farmer(NPC):
-
     def __init__(self):
         super().__init__(
             "The Farmer",

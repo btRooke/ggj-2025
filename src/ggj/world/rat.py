@@ -5,10 +5,10 @@ from .manager import WorldManager
 from .terrain import Wheat, Grass, CROP_STAGES
 from ..drawing import shape as s
 from .gameobject import GameObject, GameObjectUtils, Collidable
-from .camera import Camera
 from ..events import Events, Event
 import random
 import logging
+from ..drawing import shape as s
 
 SURROUNDING_VECTOR = [ (-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1),
                       (0, 1), (1, 1), ]
@@ -134,38 +134,10 @@ class RatOverseer:
         self.rat_attack_event: Events = Events([])
         self.num_rounds = 0
 
-    def _get_rat_direction(self, r: Rat) -> set[str]:
-        assert WorldManager.screen
-        r_x, r_y = r.get_pos()
-        c_x, c_y = Camera.get_pos()
-
-        viewport, _ = WorldManager.screen.getmaxyx()
-
-        top_cam_y = c_y - (viewport / 2)
-        bottom_cam_y = c_y + (viewport / 2)
-        left_cam_x = c_x - (viewport / 2)
-        right_cam_x = c_x + (viewport / 2)
-
-        directions: set[str] = set()
-
-        if r_y < top_cam_y:
-            directions.add('n')
-
-        if r_y > bottom_cam_y:
-            directions.add('s')
-
-        if r_x < left_cam_x:
-            directions.add('w')
-
-        if r_x > right_cam_x:
-            directions.add('e')
-
-        return directions
-
     def rat_attack(self):
         self.num_rounds += 1
 
-        for _ in range(min(20, round(START_RATS * (self.num_rounds * 0.5)))):
+        for _ in range(round(START_RATS * (self.num_rounds * 0.5))):
             grasses = WorldManager.get_objects_of_type({ Grass })
             block = random.choice(grasses)
             WorldManager.add_object(Rat(*block.get_pos()))
@@ -187,18 +159,19 @@ class RatOverseer:
         self.rat_attack_event = Events([e])
 
     def update(self):
+        assert WorldManager.screen
         self._process_rat_attack()
         self.rat_attack_event.check()
-        out_of_sight = (o for o in WorldManager.get_out_of_sight_objects() if isinstance(o, Rat))
+        out_of_sight = [o for o in WorldManager.get_out_of_sight_objects() if isinstance(o, Rat)]
 
-        if next(out_of_sight, None) == None:
+        if not len(out_of_sight):
             self.on_all_rats()
             return
 
         dirs: set[str] = set()
 
         for rat in out_of_sight:
-            dirs = dirs | self._get_rat_direction(rat)
+            dirs = dirs | s.get_direction(WorldManager.screen, *rat.get_pos())
 
         self.on_rat_hidden(dirs)
 

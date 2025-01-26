@@ -4,9 +4,8 @@ import sys
 import time
 from curses import window
 from pathlib import Path
-from threading import Thread
-
 from mypy import api
+from typing import cast
 
 from ggj.interface.conversation import Conversations
 from ggj.world.item import WHEAT, QUID
@@ -38,7 +37,6 @@ PACKAGE_ROOT = Path(__file__).parent.resolve()
 
 GAME_TICK_FREQUENCY = 30
 EVENT_TICK_FREQUENCY = 10
-
 
 def _run_mypy() -> None:
     """
@@ -155,17 +153,18 @@ def world_loop(stdscr: window):
         WorldManager.add_object(r)
 
     def talk_to_npc():
-        npc = list(
+        os = list(
             filter(
                 lambda o: isinstance(o, NPC)
                 and o.get_pos() in p.get_surrounding(),
                 WorldManager.get_all_objects(),
             )
         )
-        if len(npc) < 1:
+        if len(os) < 1:
             return
 
-        conversations.converse(npc[0])
+        npc = cast(NPC, os[0])
+        conversations.converse(npc)
 
         if QUID in p.inventory.inventory:
             stats["quids"] = p.inventory.inventory[QUID]
@@ -229,6 +228,7 @@ if __name__ == "__main__":
     logger.info(f"new game started")
     try:
         curses.wrapper(world_loop)
-    except (KeyboardInterrupt, Exception) as e:
+    except KeyboardInterrupt:
         logger.debug("stopping game")
+    except Exception:
         raise
