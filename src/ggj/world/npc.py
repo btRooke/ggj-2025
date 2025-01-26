@@ -16,6 +16,10 @@ class NPC(ABC, GameObject):
         states: dict[str, str],
         current_state: str,
         location: tuple[int, int],
+        trade_as_buyer: str = "Let's see what you've got...",
+        trade_as_seller: str = "Have a proper good peruse of my wares...",
+        trade_success: str = "Thanks for doing business with me.",
+        trade_fail: str = "Not a good deal, sorry.",
     ):
         self.name = name
         assert len(icon) == 1
@@ -24,6 +28,13 @@ class NPC(ABC, GameObject):
         self.states = states
         self.current_state = current_state
         self.location = location
+
+        # trade comments
+
+        self.trade_as_buyer = trade_as_buyer
+        self.trade_as_seller = trade_as_seller
+        self.trade_success = trade_success
+        self.trade_fail = trade_fail
 
     def update(self) -> None:
         pass
