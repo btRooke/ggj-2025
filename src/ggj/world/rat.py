@@ -2,9 +2,9 @@ from typing_extensions import Optional, Callable
 import heapq
 import time
 from .manager import WorldManager
-from .terrain import Wheat, PlantedSoil
+from .terrain import Wheat, PlantedSoil, Grass
 from ..drawing import shape as s
-from .gameobject import GameObject, GameObjectUtils
+from .gameobject import GameObject, GameObjectUtils, Collidable
 import logging
 from .camera import Camera
 
@@ -60,7 +60,7 @@ def next_step(start: tuple[int, int], destination: tuple[int, int]) -> tuple[int
 
 STEP_INTERVAL = .5
 
-class Rat:
+class Rat(Collidable):
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
         self.target_pos: Optional[tuple[int, int]]
@@ -110,6 +110,13 @@ class Rat:
 
     def get_pos(self) -> tuple[int, int]:
         return self.pos[0], self.pos[1]
+
+    def on_collide(self, object: GameObject):
+        if isinstance(object, Wheat):
+            x, y = self.get_pos()
+            WorldManager.clear_cell(x, y)
+            WorldManager.add_object(Grass(x,y))
+
 
 class RatOverseer:
     def __init__(self):

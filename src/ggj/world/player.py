@@ -61,7 +61,7 @@ class Player(Collidable):
         self.inventory = PlayerInventory()
         self.inventory.inventory[SHOVEL] = 1
         self.inventory.inventory[WOODEN_STICK] = 1
-        self.inventory.inventory[SEEDS] = 1
+        self.inventory.inventory[SEEDS] = 5
         self.inventory.inventory[SCYTHE] = 1
         self.inventory.active_item = SHOVEL
 
