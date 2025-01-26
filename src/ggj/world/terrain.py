@@ -4,7 +4,6 @@ from .manager import WorldManager
 from .gameobject import GameObject
 import random
 import time
-import logging
 
 class Grass:
     def __init__(self, x: int, y: int):
@@ -74,7 +73,7 @@ class Hole:
 
 
 SPILL_INTERVAL = 2
-MAX_GLISTEN_INTERVAL = 3
+MAX_GLISTEN_INTERVAL = 5
 
 class Water:
     def __init__(self, x: int, y: int):
@@ -132,7 +131,6 @@ class Water:
     def impassable(self) -> bool:
         return True
 
-
 class Soil:
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
@@ -152,15 +150,22 @@ class Soil:
         return 0
 
     def impassable(self) -> bool:
-        return True
+        return False
 
+WHEAT_TIME = 5
 
 class PlantedSoil:
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
+        self.creation_time = time.monotonic()
 
     def update(self):
-        pass
+        if (time.monotonic() - self.creation_time) < WHEAT_TIME:
+            return
+
+        pos_x, pos_y = self.get_pos()
+        WorldManager.clear_cell(pos_x, pos_y)
+        WorldManager.add_object(Wheat(pos_x, pos_y))
 
     def draw(self):
         assert WorldManager.screen
@@ -174,7 +179,7 @@ class PlantedSoil:
         return 0
 
     def impassable(self) -> bool:
-        return True
+        return False
 
 
 class Wheat:
@@ -196,8 +201,7 @@ class Wheat:
         return 0
 
     def impassable(self) -> bool:
-        return True
-
+        return False
 
 class TerrainFactory:
     @staticmethod

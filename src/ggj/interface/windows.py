@@ -113,7 +113,7 @@ class LeftOptionsMenu(OptionsMenu):
         self._required_redraw = True
 
     def draw(self) -> None:
-
+        self._ww.clear()
         self._ww.move(0, 0)
 
         # equipped tool
@@ -127,10 +127,12 @@ class LeftOptionsMenu(OptionsMenu):
         self._ww.addstr("\n\n")
 
         if self.inventory.active_item:
-            assert "wieldable" in self.inventory.active_item.traits
+            assert (
+               "wieldable" in self.inventory.active_item.traits or
+               "placeable" in self.inventory.active_item.traits
+            )
 
         # line
-
         self._ww.addstr(("─" * (self._ww.getmaxyx()[1]) + "\n"))
 
         # inventory

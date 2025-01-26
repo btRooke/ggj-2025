@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-
 @dataclass()
 class Item:
     name: str
@@ -9,6 +8,7 @@ class Item:
     def __hash__(self):
         return hash(str)
 
-
 SHOVEL = Item("Shovel", ["wieldable"])
 WOODEN_STICK = Item("Wooden Stick", ["wieldable"])
+SEEDS = Item("Seed", ["placeable"])
+SCYTHE = Item("Scythe", ["wieldable"])

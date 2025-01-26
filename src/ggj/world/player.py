@@ -2,17 +2,15 @@ import curses
 import logging
 from dataclasses import dataclass, field
 from typing import Optional
-
 from .camera import Camera
-from .gameobject import Collidable, GameObject
-from .item import Item, SHOVEL, WOODEN_STICK
+from .gameobject import GameObject, Collidable
+from .item import Item, SHOVEL, WOODEN_STICK, SEEDS, SCYTHE
 from .manager import WorldManager
-from .terrain import Hole
+from .terrain import Hole, Soil, Water, PlantedSoil, Wheat, Grass
 from ..drawing import shape as s
 
 MOVE_CAMERA_COLS = 5
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class PlayerInventory:
@@ -39,21 +37,39 @@ class PlayerInventory:
         logger.info(f"switching to {next_item}")
         self.active_item = next_item[0]
 
+    def pickup(self, item: Item, amount: int):
+        a = self.inventory.get(item, 0)
+        self.inventory[item] = a + amount
+
+    def remove(self, item: Item):
+        number = self.inventory.get(item, 0) - 1
+
+        if number <= 0:
+            self.inventory.pop(item)
+            assert len(self.inventory) > 0
+            self.active_item = list(self.inventory.keys())[0]
+        else:
+            self.inventory[item] = number
+
 
 class Player(Collidable):
     def __init__(self, x: int, y: int):
         self.pos: list[int] = [x, y]
 
         # inventory
-
         self.inventory = PlayerInventory()
         self.inventory.inventory[SHOVEL] = 1
         self.inventory.inventory[WOODEN_STICK] = 1
+        self.inventory.inventory[SEEDS] = 1
+        self.inventory.inventory[SCYTHE] = 1
         self.inventory.active_item = SHOVEL
 
         # item actions
-        self.item_actions = {SHOVEL: self.dig}
-
+        self.item_actions = {
+            SHOVEL: self.dig,
+            SEEDS: self.place,
+            SCYTHE: self.cultivate
+        }
     def update(self):
         pass
 
@@ -61,6 +77,61 @@ class Player(Collidable):
         x, y = self.get_pos()
         WorldManager.clear_cell(x, y)
         WorldManager.add_object(Hole(x, y))
+
+    def place(self):
+        x, y = self.get_pos()
+        objs = WorldManager.get_objects(x, y)
+
+        if not any(filter(lambda o: isinstance(o, Soil), objs)):
+            return
+
+        WorldManager.clear_cell(x, y)
+        WorldManager.add_object(PlantedSoil(x, y))
+        self.inventory.remove(SEEDS)
+
+    def cultivate(self):
+        pos_x, pos_y = self.get_pos()
+
+        objs = WorldManager.get_objects(pos_x, pos_y)
+
+        if any(filter(lambda o: isinstance(o, Wheat), objs)):
+            return self._harvest_wheat()
+
+        return self._till_soil()
+        
+    def _harvest_wheat(self):
+        pos_x, pos_y = self.get_pos()
+        WorldManager.clear_cell(pos_x, pos_y)
+        WorldManager.add_object(Grass(pos_x, pos_y))
+        self.inventory.pickup(SEEDS, 3)
+
+    def _till_soil(self):
+        pos_x, pos_y = self.get_pos()
+
+        # can only place is near a water tile
+        surrounding_vectors = {
+            (-1, -1),
+            (0, -1),
+            (1, -1),
+            (-1, 0),
+            (1, 0),
+            (-1, 1),
+            (0, 1),
+            (1, 1),
+        }
+
+        surrounding_objs = []
+
+        for vec_x, vec_y in surrounding_vectors:
+            n_x, n_y = pos_x + vec_x, pos_y + vec_y
+            objs = WorldManager.get_objects(n_x, n_y)
+            surrounding_objs.extend(objs)
+
+        if not any(filter(lambda o: isinstance(o, Water), surrounding_objs)):
+            return
+
+        WorldManager.clear_cell(pos_x, pos_y)
+        WorldManager.add_object(Soil(pos_x, pos_y))
 
     def draw(self):
         assert WorldManager.screen
