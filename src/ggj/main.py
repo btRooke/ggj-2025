@@ -102,6 +102,12 @@ def world_loop(stdscr: window):
         diag_box,
     ]
 
+    def update_inv_ui():
+        inv_box._required_redraw = True
+        right_box._required_redraw = True
+
+    p.inventory.update_inv_cb = update_inv_ui
+
     rat_overseer = rat.RatOverseer()
     WorldManager.add_object(rat_overseer)
 
