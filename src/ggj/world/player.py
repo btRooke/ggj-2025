@@ -1,11 +1,12 @@
 import curses
 import logging
+import random
 import time
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, Callable
 from .camera import Camera
 from .gameobject import GameObject, Collidable
-from .item import Item, SHOVEL, WOODEN_STICK, SEEDS, SCYTHE
+from .item import Item, SHOVEL, WOODEN_STICK, SEEDS, SCYTHE, WHEAT
 from .manager import WorldManager
 from .rat import Rat
 from .terrain import (
@@ -27,6 +28,7 @@ logger = logging.getLogger(__name__)
 class PlayerInventory:
     inventory: dict[Item, int] = field(default_factory=dict)
     active_item: Optional[Item] = None
+    update_inv_cb: Optional[Callable[[], None]] = None
 
     def next_active(self) -> None:
         items: list[Item] = sorted(
@@ -51,9 +53,15 @@ class PlayerInventory:
         logger.info(f"switching to {next_item}")
         self.active_item = next_item[0]
 
+        if self.update_inv_cb:
+            self.update_inv_cb()
+
     def pickup(self, item: Item, amount: int):
         a = self.inventory.get(item, 0)
         self.inventory[item] = a + amount
+
+        if self.update_inv_cb:
+            self.update_inv_cb()
 
     def remove(self, item: Item):
         number = self.inventory.get(item, 0) - 1
@@ -66,6 +74,9 @@ class PlayerInventory:
             self.active_item = items[(item_idx + 1) % len(items)]
         else:
             self.inventory[item] = number
+
+        if self.update_inv_cb:
+            self.update_inv_cb()
 
 
 class Player(Collidable):
@@ -90,6 +101,8 @@ class Player(Collidable):
             SCYTHE: self.cultivate,
             WOODEN_STICK: self.whack,
         }
+        self.rat_cb: Optional[Callable[[int], None]] = None
+        self.wheat_harvested_cb: Optional[Callable[[int], None]] = None
 
     def update(self):
 
@@ -112,6 +125,9 @@ class Player(Collidable):
         )
         for rat in rats:
             WorldManager.remove(rat)
+
+        if self.rat_cb is not None:
+            self.rat_cb(len(rats))
 
     def dig(self):
         x, y = self.get_pos()
@@ -143,7 +159,10 @@ class Player(Collidable):
         pos_x, pos_y = self.get_pos()
         WorldManager.clear_cell(pos_x, pos_y)
         WorldManager.add_object(Grass(pos_x, pos_y))
-        self.inventory.pickup(SEEDS, 3)
+        self.inventory.pickup(SEEDS, random.randint(1, 3))
+        self.inventory.pickup(WHEAT, 1)
+        if self.wheat_harvested_cb is not None:
+            self.wheat_harvested_cb(1)
 
     def _till_soil(self):
         pos_x, pos_y = self.get_pos()
