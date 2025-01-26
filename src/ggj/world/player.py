@@ -120,11 +120,12 @@ class Player(Collidable):
             filter(
                 lambda o: isinstance(o, Rat)
                 and o.get_pos() in self.get_surrounding(),
-                WorldManager.objects,
+                WorldManager.get_all_objects(),
             )
         )
         for rat in rats:
-            WorldManager.objects.remove(rat)
+            WorldManager.remove(rat)
+
         if self.rat_cb is not None:
             self.rat_cb(len(rats))
 
@@ -218,8 +219,10 @@ class Player(Collidable):
             curses.beep()
             return
 
+        WorldManager.remove(self)
         self.pos[0] = new_pos_x
         self.pos[1] = new_pos_y
+        WorldManager.add_object(self)
 
         player_x, player_y = self.get_pos()
         cam_x, cam_y = Camera.get_pos()

@@ -5,10 +5,10 @@ from .manager import WorldManager
 from .terrain import Wheat, Grass, CROP_STAGES
 from ..drawing import shape as s
 from .gameobject import GameObject, GameObjectUtils, Collidable
-import logging
 from .camera import Camera
 from ..events import Events, Event
 import random
+import logging
 
 SURROUNDING_VECTOR = [ (-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1),
                       (0, 1), (1, 1), ]
@@ -91,14 +91,15 @@ class Rat(Collidable):
         next_pos = next_step(self.get_pos(), self.target_pos)
 
         # TODO: have the rats moving away
-        if self.target_pos == tuple(self.pos):
-            other_items = WorldManager.get_objects(*self.pos)
+        if self.target_pos == tuple(self.pos) \
+                and not len(WorldManager.get_objects_of_type(set(CROP_STAGES))):
+            WorldManager.remove(self)
+            return
 
-            if not next((o for o in other_items if type(other_items) in CROP_STAGES), None):
-                WorldManager.remove(self)
-
+        WorldManager.remove(self)
         self.pos[0] = next_pos[0]
         self.pos[1] = next_pos[1]
+        WorldManager.add_object(self)
 
         self.last_step_time = time.monotonic()
 
@@ -119,11 +120,12 @@ class Rat(Collidable):
     def on_collide(self, object: GameObject):
         if isinstance(object, Wheat):
             x, y = self.get_pos()
+            logging.debug("Eaten grass")
             WorldManager.clear_cell(x, y)
             WorldManager.add_object(Grass(x,y))
 
-RAT_ATTACK_TIME = 120
-START_RATS = 2
+RAT_ATTACK_TIME = 30
+START_RATS = 4
 
 class RatOverseer:
     def __init__(self):
@@ -139,10 +141,10 @@ class RatOverseer:
 
         viewport, _ = WorldManager.screen.getmaxyx()
 
-        top_cam_y = c_y - viewport / 2
-        bottom_cam_y = c_y + viewport / 2
-        left_cam_x = c_x - viewport / 2
-        right_cam_x = c_x + viewport / 2
+        top_cam_y = c_y - (viewport / 2)
+        bottom_cam_y = c_y + (viewport / 2)
+        left_cam_x = c_x - (viewport / 2)
+        right_cam_x = c_x + (viewport / 2)
 
         directions: set[str] = set()
 
@@ -162,7 +164,8 @@ class RatOverseer:
 
     def rat_attack(self):
         self.num_rounds += 1
-        for _ in range(round(START_RATS * (self.num_rounds * 0.5))):
+
+        for _ in range(min(20, round(START_RATS * (self.num_rounds * 0.5)))):
             grasses = WorldManager.get_objects_of_type({ Grass })
             block = random.choice(grasses)
             WorldManager.add_object(Rat(*block.get_pos()))
@@ -170,6 +173,9 @@ class RatOverseer:
 
     def _process_rat_attack(self):
         if not self.rat_attack_event.done():
+            return
+
+        if WorldManager.get_objects_of_type(set([Rat])):
             return
 
         target_objs = WorldManager.get_objects_of_type(set(CROP_STAGES))
@@ -206,7 +212,7 @@ class RatOverseer:
         return 1000
 
     def get_pos(self) -> tuple[int, int]:
-        return (0, 0)
+        return (1000, 1000)
 
     def set_on_all_rats(self, c: Callable[[], None]):
         self.on_all_rats = c
