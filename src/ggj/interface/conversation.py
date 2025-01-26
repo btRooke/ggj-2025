@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class Conversations:
-
     def __init__(
         self,
         p: Player,

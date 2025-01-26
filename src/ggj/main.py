@@ -159,11 +159,12 @@ def world_loop(stdscr: window):
             filter(
                 lambda o: isinstance(o, NPC)
                 and o.get_pos() in p.get_surrounding(),
-                WorldManager.objects,
+                WorldManager.get_all_objects(),
             )
         )
         if len(npc) < 1:
             return
+
         conversations.converse(npc[0])
 
         if QUID in p.inventory.inventory:
