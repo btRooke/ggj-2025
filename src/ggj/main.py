@@ -7,7 +7,8 @@ from pathlib import Path
 
 from mypy import api
 
-from ggj.interface.conversation import converse
+from ggj.interface.conversation import Conversations
+from ggj.world.item import WHEAT
 from ggj.world.npc import Farmer, NPC
 from ggj.world.terrain import SURROUNDING_VECTOR
 from .events import Events
@@ -87,6 +88,7 @@ def world_loop(stdscr: window):
 
     # hook up movement
     p = player.Player(player_start_x, player_start_y)
+    p.inventory.inventory[WHEAT] = 2
     WorldManager.add_object(p)
 
     # interface components
@@ -107,7 +109,7 @@ def world_loop(stdscr: window):
     WorldManager.add_object(rat_overseer)
 
     def set_rat_indicators(rat_dirs: set[str]):
-        dirs = {'n', 'e', 's', 'w'}
+        dirs = {"n", "e", "s", "w"}
 
         for d in rat_dirs:
             world_viewer_border.start_flashing(d)
@@ -119,6 +121,10 @@ def world_loop(stdscr: window):
     rat_overseer.set_on_rat_hidden(lambda dirs: set_rat_indicators(dirs))
 
     WorldManager.add_object(Farmer())
+
+    il = KeyboardListener(stdscr)
+
+    conversations = Conversations(p, inv_box, diag_box, right_box, il)
 
     def move(move_vector: tuple[int, int]):
         p.move(move_vector)
@@ -143,9 +149,8 @@ def world_loop(stdscr: window):
         )
         if len(npc) < 1:
             return
-        converse(npc[0], diag_box, right_box, il)
+        conversations.converse(npc[0])
 
-    il = KeyboardListener(stdscr)
     il.callbacks["a"] = lambda: move((-1, 0))
     il.callbacks["d"] = lambda: move((1, 0))
     il.callbacks["s"] = lambda: move((0, 1))

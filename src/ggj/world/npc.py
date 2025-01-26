@@ -1,10 +1,10 @@
 import curses
-from abc import ABC, abstractmethod
+from abc import ABC
 
-from .gameobject import GameObject, Collidable
+from .gameobject import GameObject
+from .item import Item, QUID, WHEAT
 from .manager import WorldManager
 from ..drawing import shape as s
-from ..interface.windows import DialogueBox
 
 
 class NPC(ABC, GameObject):
@@ -20,7 +20,10 @@ class NPC(ABC, GameObject):
         trade_as_seller: str = "Have a proper good peruse of my wares...",
         trade_success: str = "Thanks for doing business with me.",
         trade_fail: str = "Not a good deal, sorry.",
+        inventory: dict[Item, int] = {},
+        trades: list[tuple[Item, Item]] = [],
     ):
+        self.trades = trades
         self.name = name
         assert len(icon) == 1
         self.icon = icon
@@ -28,6 +31,7 @@ class NPC(ABC, GameObject):
         self.states = states
         self.current_state = current_state
         self.location = location
+        self.inventory = inventory
 
         # trade comments
 
@@ -65,4 +69,6 @@ class Farmer(NPC):
             {"start": "Hope you're ready to kill some PESTERLY EVIL rats!"},
             "start",
             (25, 25),
+            trades=[(WHEAT, QUID)],
+            inventory={QUID: 1_000_000},
         )

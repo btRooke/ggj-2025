@@ -1,14 +1,18 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
 
 @dataclass()
 class Item:
     name: str
-    traits: list[str]
+    traits: list[str] = field(default_factory=list)
 
     def __hash__(self):
         return hash(str)
+
 
 SHOVEL = Item("Shovel", ["wieldable"])
 WOODEN_STICK = Item("Wooden Stick", ["wieldable"])
 SEEDS = Item("Seed", ["placeable"])
 SCYTHE = Item("Scythe", ["wieldable"])
+WHEAT = Item("Wheat")
+QUID = Item("Quid")

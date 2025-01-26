@@ -12,13 +12,17 @@ from ..drawing import shape as s
 MOVE_CAMERA_COLS = 5
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class PlayerInventory:
     inventory: dict[Item, int] = field(default_factory=dict)
     active_item: Optional[Item] = None
 
     def next_active(self) -> None:
-        items: list[Item] = sorted(self.inventory, key=lambda x: x.name)
+        items: list[Item] = sorted(
+            filter(lambda i: "wieldable" in i.traits, self.inventory),
+            key=lambda x: x.name,
+        )
         if self.active_item is None:
             if len(items) == 0:
                 return
@@ -53,6 +57,7 @@ class PlayerInventory:
         else:
             self.inventory[item] = number
 
+
 class Player(Collidable):
     def __init__(self, x: int, y: int):
         self.pos: list[int] = [x, y]
@@ -69,8 +74,9 @@ class Player(Collidable):
         self.item_actions = {
             SHOVEL: self.dig,
             SEEDS: self.place,
-            SCYTHE: self.cultivate
+            SCYTHE: self.cultivate,
         }
+
     def update(self):
         pass
 
@@ -99,7 +105,7 @@ class Player(Collidable):
             return self._harvest_wheat()
 
         return self._till_soil()
-        
+
     def _harvest_wheat(self):
         pos_x, pos_y = self.get_pos()
         WorldManager.clear_cell(pos_x, pos_y)
