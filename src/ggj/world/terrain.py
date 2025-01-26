@@ -145,7 +145,7 @@ class Soil:
     def impassable(self) -> bool:
         return False
 
-WHEAT_TIME = 5
+WHEAT_TIME = 20
 
 class PlantedSoil:
     def __init__(self, x: int, y: int):
