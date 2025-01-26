@@ -93,7 +93,7 @@ class Rat(Collidable):
         # TODO: have the rats moving away
         if self.target_pos == tuple(self.pos) \
                 and not len(WorldManager.get_objects_of_type(set(CROP_STAGES))):
-                    #    WorldManager.remove(self)
+            WorldManager.remove(self)
             return
 
         WorldManager.remove(self)
