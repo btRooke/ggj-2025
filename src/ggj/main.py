@@ -118,7 +118,7 @@ def world_loop(stdscr: window):
     rat_overseer.set_on_all_rats(lambda: set_rat_indicators(set()))
     rat_overseer.set_on_rat_hidden(lambda dirs: set_rat_indicators(dirs))
 
-    WorldManager.add_object(Farmer(diag_box))
+    WorldManager.add_object(Farmer())
 
     def move(move_vector: tuple[int, int]):
         p.move(move_vector)

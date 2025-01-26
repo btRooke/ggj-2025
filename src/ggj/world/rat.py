@@ -21,6 +21,8 @@ def next_step(start: tuple[int, int], destination: tuple[int, int]) -> tuple[int
     dest_x, dest_y = destination
     came_from: dict[tuple[int, int], tuple[int, int]] = dict()
 
+    current = start
+
     while len(frontier):
         priority, current = heapq.heappop(frontier)
         curr_x, curr_y = current
@@ -43,10 +45,13 @@ def next_step(start: tuple[int, int], destination: tuple[int, int]) -> tuple[int
             heapq.heappush(frontier, (priority, (new_x, new_y)))
             came_from[(new_x, new_y)] = current
 
-    backtrack = destination
+    backtrack = current
 
     if not len(came_from):
         return destination
+
+    if backtrack not in came_from:
+        return start
 
     while came_from[backtrack] != start:
         backtrack = came_from[backtrack]
@@ -142,7 +147,7 @@ class RatOverseer:
     def update(self):
         out_of_sight = (o for o in WorldManager.get_out_of_sight_objects() if isinstance(o, Rat))
 
-        if not next(out_of_sight, None):
+        if next(out_of_sight, None) == None:
             self.on_all_rats()
             return
 
