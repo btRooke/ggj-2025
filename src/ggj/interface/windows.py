@@ -2,7 +2,8 @@ import curses
 import logging
 import time
 from curses import textpad
-from typing import Any
+from threading import Thread
+from typing import Any, override, Optional
 
 from . import InterfaceObject
 from ..world.item import Item
@@ -80,6 +81,7 @@ class RightOptionsMenu(OptionsMenu):
         self._health_percentage = 0.72
 
     def set_health(self, percentage: float) -> None:
+        logger.info(f"health set to {percentage}")
         self._health_percentage = percentage
         self._required_redraw = True
 
@@ -178,13 +180,74 @@ class WorldViewerBorder(InterfaceObject):
         )
         self._w = root_window.subwin(
             world_viewer_height + 3,
-            world_viewer_width + 3,
+            world_viewer_width + 2,
             world_viewer_base_i - 1,
             world_viewer_base_j - 1,
         )
+        self.direction_colours = {
+            "n": curses.COLOR_WHITE,
+            "e": curses.COLOR_WHITE,
+            "s": curses.COLOR_WHITE,
+            "w": curses.COLOR_RED,
+        }
+        self._flashers: dict[str, Optional[Flasher]] = {
+            "n": None,
+            "e": None,
+            "s": None,
+            "w": None,
+        }
         self._required_redraw = True
 
+    def start_flashing(self, direction: str) -> None:
+        if self._flashers[direction] is not None:
+            return
+        else:
+            f = Flasher(self, direction)
+            self._flashers[direction] = f
+            f.start()
+
+    def stop_flashing(self, direction: str) -> None:
+        if (f := self._flashers[direction]) is not None:
+            f.running = False
+            self._flashers[direction] = None
+
     def draw(self) -> None:
-        h, w = self._w.getmaxyx()
-        textpad.rectangle(self._w, 0, 0, h - 2, w - 2)  # TODO hack for now
+        uly, ulx = 0, 0
+        lry, lrx = self._w.getmaxyx()
+        lry -= 2
+        lrx -= 1
+
+        self._w.attron(curses.color_pair(self.direction_colours["w"]))
+        self._w.vline(uly + 1, ulx, curses.ACS_VLINE, lry - uly - 1)
+        self._w.attron(curses.color_pair(self.direction_colours["n"]))
+        self._w.hline(uly, ulx + 1, curses.ACS_HLINE, lrx - ulx - 1)
+        self._w.attron(curses.color_pair(self.direction_colours["s"]))
+        self._w.hline(lry, ulx + 1, curses.ACS_HLINE, lrx - ulx - 1)
+        self._w.attron(curses.color_pair(self.direction_colours["e"]))
+        self._w.vline(uly + 1, lrx, curses.ACS_VLINE, lry - uly - 1)
+        self._w.addch(uly, ulx, curses.ACS_ULCORNER)
+        self._w.addch(uly, lrx, curses.ACS_URCORNER)
+        self._w.addch(lry, lrx, curses.ACS_LRCORNER)
+        self._w.addch(lry, ulx, curses.ACS_LLCORNER)
+
         self._w.refresh()
+
+
+class Flasher(Thread):
+
+    def __init__(self, world_border: WorldViewerBorder, direction: str):
+        super().__init__()
+        self._wb = world_border
+        self.running = True
+        assert direction in ["n", "e", "w", "s"]
+        self._direction = direction
+
+    @override
+    def run(self):
+        while self.running:
+            self._wb.direction_colours[self._direction] = curses.COLOR_RED
+            self._wb._required_redraw = True
+            time.sleep(0.25)
+            self._wb.direction_colours[self._direction] = curses.COLOR_WHITE
+            self._wb._required_redraw = True
+            time.sleep(0.25)

@@ -91,12 +91,15 @@ def world_loop(stdscr: window):
     inv_box = LeftOptionsMenu(stdscr, world_window.getmaxyx()[1], p.inventory)
     right_box = RightOptionsMenu(stdscr, world_window.getmaxyx()[1])
     right_box.set_health(0.43)  # TODO hook up health
+    world_viewer_border = WorldViewerBorder(stdscr, world_window)
     interface_components: list[InterfaceObject] = [
-        WorldViewerBorder(stdscr, world_window),
+        world_viewer_border,
         right_box,
         inv_box,
         diag_box,
     ]
+
+    world_viewer_border.start_flashing("w")
 
     def move(move_vector: tuple[int, int]):
         p.move(move_vector)
