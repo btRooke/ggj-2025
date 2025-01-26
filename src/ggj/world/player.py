@@ -101,6 +101,8 @@ class Player(Collidable):
             SCYTHE: self.cultivate,
             WOODEN_STICK: self.whack,
         }
+        self.rat_cb: Optional[Callable[[int], None]] = None
+        self.wheat_harvested_cb: Optional[Callable[[int], None]] = None
 
     def update(self):
 
@@ -123,6 +125,8 @@ class Player(Collidable):
         )
         for rat in rats:
             WorldManager.objects.remove(rat)
+        if self.rat_cb is not None:
+            self.rat_cb(len(rats))
 
     def dig(self):
         x, y = self.get_pos()
@@ -156,6 +160,8 @@ class Player(Collidable):
         WorldManager.add_object(Grass(pos_x, pos_y))
         self.inventory.pickup(SEEDS, random.randint(1, 3))
         self.inventory.pickup(WHEAT, 1)
+        if self.wheat_harvested_cb is not None:
+            self.wheat_harvested_cb(1)
 
     def _till_soil(self):
         pos_x, pos_y = self.get_pos()

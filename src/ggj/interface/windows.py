@@ -50,7 +50,7 @@ class OptionsMenu(InterfaceObject):
     def __init__(self, parent: curses.window, i: int, j: int):
         super().__init__()
         self._w = parent.subwin(OptionsMenu.HEIGHT, OptionsMenu.WIDTH, i, j)
-        self.options: dict[str, Any] = {}
+        self.stats: dict[str, Any] = {}
         self._ww = self._w.derwin(
             OptionsMenu.HEIGHT - 4, OptionsMenu.WIDTH - 8, 2, 4
         )
@@ -58,7 +58,12 @@ class OptionsMenu(InterfaceObject):
 
 class RightOptionsMenu(OptionsMenu):
 
-    def __init__(self, root: curses.window, world_viewer_width: int):
+    def __init__(
+        self,
+        root: curses.window,
+        world_viewer_width: int,
+        stats: dict[str, int],
+    ):
         options_space_width = (root.getmaxyx()[1] - world_viewer_width) / 2
         super().__init__(
             root,
@@ -70,12 +75,14 @@ class RightOptionsMenu(OptionsMenu):
                 - OptionsMenu.WIDTH / 2
             ),
         )
-        self.options = {
-            "TODO implement this": 0,
-            "🌾 Plants planted": 42,
-            "💸 Quids": 12,
-            "🐛 Mutant Rats killed": 1,
+        self.labels: dict[str, str] = {
+            "plants": "🌾 Wheat Harvested planted",
+            "quids": "💸 Quids",
+            "rats": "🐛 Mutant Creatures Killed",
+            "bubb": "🫧 Bubbles Blown",
         }
+        self.stats = stats
+
         self._required_redraw = True
         self._health_percentage = 0.72
         self._diag_options: list[str] = []
@@ -112,14 +119,14 @@ class RightOptionsMenu(OptionsMenu):
 
         # options
 
-        for i, k in enumerate(self.options):
+        for i, k in enumerate(self.stats):
 
             if i != 0:
                 self._ww.addstr("\n\n")
 
-            self._ww.addstr(k, curses.A_BOLD)
+            self._ww.addstr(self.labels[k], curses.A_BOLD)
             self._ww.addstr("\n")
-            self._ww.addstr(str(self.options[k]))
+            self._ww.addstr(str(self.stats[k]))
 
         self._ww.addstr("\n\n")
 

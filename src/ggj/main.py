@@ -8,10 +8,8 @@ from pathlib import Path
 from mypy import api
 
 from ggj.interface.conversation import Conversations
-from ggj.world.item import WHEAT
+from ggj.world.item import WHEAT, QUID
 from ggj.world.npc import Farmer, NPC
-from ggj.world.rat import Rat
-from ggj.world.terrain import SURROUNDING_VECTOR
 from .events import Events
 from .input import KeyboardListener
 from .interface import InterfaceObject
@@ -54,6 +52,9 @@ def _run_mypy() -> None:
 
 
 def world_loop(stdscr: window):
+
+    stats = {"plants": 0, "rats": 0, "quids": 0, "bubb": 0}
+
     curses.use_default_colors()
     curses.start_color()
     curses.curs_set(False)
@@ -84,15 +85,25 @@ def world_loop(stdscr: window):
 
     Camera.move_camera((player_start_x, player_start_y))
 
+    def rat_cb(n: int):
+        stats["rats"] += n
+        update_inv_ui()
+
+    def wheat_cb(n: int):
+        stats["plants"] += n
+        update_inv_ui()
+
     # hook up movement
     p = player.Player(player_start_x, player_start_y)
     p.inventory.inventory[WHEAT] = 2
+    p.rat_cb = rat_cb
+    p.wheat_harvested_cb = wheat_cb
     WorldManager.add_object(p)
 
     # interface components
     diag_box = DialogueBox(stdscr, world_window.getmaxyx()[1])
     inv_box = LeftOptionsMenu(stdscr, world_window.getmaxyx()[1], p.inventory)
-    right_box = RightOptionsMenu(stdscr, world_window.getmaxyx()[1])
+    right_box = RightOptionsMenu(stdscr, world_window.getmaxyx()[1], stats)
     right_box.set_health(0.43)  # TODO hook up health
     world_viewer_border = WorldViewerBorder(stdscr, world_window)
     interface_components: list[InterfaceObject] = [
@@ -152,6 +163,10 @@ def world_loop(stdscr: window):
         if len(npc) < 1:
             return
         conversations.converse(npc[0])
+
+        if QUID in p.inventory.inventory:
+            stats["quids"] = p.inventory.inventory[QUID]
+            update_inv_ui()
 
     il.callbacks["a"] = lambda: move((-1, 0))
     il.callbacks["d"] = lambda: move((1, 0))
