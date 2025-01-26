@@ -53,9 +53,42 @@ class Boundary:
 class Hole:
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
+        self.last_spill_time = 0
 
     def update(self):
-        pass
+        pos_x, pos_y = self.pos
+
+        self.last_spill_time = time.monotonic() if self.last_spill_time == 0 \
+                else self.last_spill_time
+
+        if (time.monotonic() - self.last_spill_time) < SPILL_INTERVAL:
+            return
+
+        # if cell next to current cell is a hole then replace the cel
+        # with water after x number of seconds
+        surrounding_vector = [
+            (-1, -1),
+            (0, -1),
+            (1, -1),
+            (-1, 0),
+            (1, 0),
+            (-1, 1),
+            (0, 1),
+            (1, 1),
+        ]
+
+        for vec_x, vec_y in surrounding_vector:
+            n_x, n_y = pos_x + vec_x, pos_y + vec_y
+            objs = WorldManager.get_objects(n_x, n_y)
+
+            is_water = any(filter(lambda o: isinstance(o, Water), objs))
+
+            if is_water:
+                WorldManager.clear_cell(pos_x, pos_y)
+                WorldManager.add_object(Water(pos_x, pos_y))
+
+        self.last_spill_time = time.monotonic()
+
 
     def draw(self):
         assert WorldManager.screen
@@ -78,44 +111,13 @@ MAX_GLISTEN_INTERVAL = 5
 class Water:
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
-        self.last_spill_time = 0
         self.last_glisten_time = 0
         self.colour = s.GLISTEN_BLUE if random.uniform(0, 1) < 0.25 else s.DEEP_BLUE
 
     def update(self):
-        pos_x, pos_y = self.get_pos()
-
         if (time.monotonic() - self.last_glisten_time) > random.uniform(1, MAX_GLISTEN_INTERVAL):
             self.colour = s.GLISTEN_BLUE if random.uniform(0, 1) < 0.5 else s.DEEP_BLUE
             self.last_glisten_time = time.monotonic()
-
-        if (time.monotonic() - self.last_spill_time) < SPILL_INTERVAL:
-            return
-
-        # if cell next to current cell is a hole then replace the cel
-        # with water after x number of seconds
-        surrounding_vector = [
-            (-1, -1),
-            (0, -1),
-            (1, -1),
-            (-1, 0),
-            (1, 0),
-            (-1, 1),
-            (0, 1),
-            (1, 1),
-        ]
-
-        for vec_x, vec_y in surrounding_vector:
-            n_x, n_y = pos_x + vec_x, pos_y + vec_y
-            objs = WorldManager.get_objects(n_x, n_y)
-
-            is_hole = any(filter(lambda o: isinstance(o, Hole), objs))
-
-            if is_hole:
-                WorldManager.clear_cell(n_x, n_y)
-                WorldManager.add_object(Water(n_x, n_y))
-
-        self.last_spill_time = time.monotonic()
 
     def get_pos(self) -> tuple[int, int]:
         return self.pos[0], self.pos[1]

@@ -45,9 +45,11 @@ class PlayerInventory:
         number = self.inventory.get(item, 0) - 1
 
         if number <= 0:
+            items: list[Item] = sorted(self.inventory, key=lambda x: x.name)
+            assert len(items) > 1 and item in items
+            item_idx = items.index(item)
             self.inventory.pop(item)
-            assert len(self.inventory) > 0
-            self.active_item = list(self.inventory.keys())[0]
+            self.active_item = items[(item_idx + 1) % len(items)]
         else:
             self.inventory[item] = number
 
