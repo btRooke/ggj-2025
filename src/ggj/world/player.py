@@ -52,7 +52,6 @@ class Player(Collidable):
         self.inventory.active_item = SHOVEL
 
         # item actions
-
         self.item_actions = {SHOVEL: self.dig}
 
     def update(self):

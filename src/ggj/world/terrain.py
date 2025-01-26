@@ -2,16 +2,14 @@ from typing_extensions import Dict, Callable
 from ..drawing import shape as s
 from .manager import WorldManager
 from .gameobject import GameObject
-
-# from .player import Player
 import random
 import time
-
+import logging
 
 class Grass:
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
-        self.colour = s.GREEN if random.random() < 0.85 else s.DEEP_GREEN
+        self.colour = s.GREEN if random.uniform(0, 1) < 0.85 else s.DEEP_GREEN
 
     def update(self):
         pass
@@ -76,15 +74,21 @@ class Hole:
 
 
 SPILL_INTERVAL = 2
-
+MAX_GLISTEN_INTERVAL = 3
 
 class Water:
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
         self.last_spill_time = 0
+        self.last_glisten_time = 0
+        self.colour = s.GLISTEN_BLUE if random.uniform(0, 1) < 0.25 else s.DEEP_BLUE
 
     def update(self):
         pos_x, pos_y = self.get_pos()
+
+        if (time.monotonic() - self.last_glisten_time) > random.uniform(1, MAX_GLISTEN_INTERVAL):
+            self.colour = s.GLISTEN_BLUE if random.uniform(0, 1) < 0.5 else s.DEEP_BLUE
+            self.last_glisten_time = time.monotonic()
 
         if (time.monotonic() - self.last_spill_time) < SPILL_INTERVAL:
             return
@@ -107,9 +111,8 @@ class Water:
             objs = WorldManager.get_objects(n_x, n_y)
 
             is_hole = any(filter(lambda o: isinstance(o, Hole), objs))
-            # is_player = any(filter(lambda o: isinstance(o, Player), objs)) TODO eek fix circular import
 
-            if is_hole:  #  and not is_player:
+            if is_hole:
                 WorldManager.clear_cell(n_x, n_y)
                 WorldManager.add_object(Water(n_x, n_y))
 
@@ -121,7 +124,7 @@ class Water:
     def draw(self):
         assert WorldManager.screen
         x, y = self.pos
-        s.world_char(WorldManager.screen, x, y, "~", s.DEEP_BLUE)
+        s.world_char(WorldManager.screen, x, y, "~", self.colour)
 
     def zindex(self) -> int:
         return 0

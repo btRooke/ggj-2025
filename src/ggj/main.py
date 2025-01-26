@@ -33,11 +33,6 @@ PACKAGE_ROOT = Path(__file__).parent.resolve()
 GAME_TICK_FREQUENCY = 30
 EVENT_TICK_FREQUENCY = 10
 
-world_layout: list[list[int]] = [
-    [i in {0, 49} or x in {0, 49} for i in range(0, 50)] for x in range(0, 50)
-]
-
-
 def _run_mypy() -> None:
     """
     Run Tim's mypy checker on the package before the game starts.
