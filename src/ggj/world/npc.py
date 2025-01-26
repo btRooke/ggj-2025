@@ -1,10 +1,10 @@
 import curses
-from abc import ABC, abstractmethod
+from abc import ABC
 
-from .gameobject import GameObject, Collidable
+from .gameobject import GameObject
+from .item import Item, QUID, WHEAT
 from .manager import WorldManager
 from ..drawing import shape as s
-from ..interface.windows import DialogueBox
 
 
 class NPC(ABC, GameObject):
@@ -16,7 +16,14 @@ class NPC(ABC, GameObject):
         states: dict[str, str],
         current_state: str,
         location: tuple[int, int],
+        trade_as_buyer: str = "Let's see what you've got...",
+        trade_as_seller: str = "Have a proper good peruse of my wares...",
+        trade_success: str = "Thanks for doing business with me.",
+        trade_fail: str = "Not a good deal, sorry.",
+        inventory: dict[Item, int] = {},
+        trades: list[tuple[Item, Item]] = [],
     ):
+        self.trades = trades
         self.name = name
         assert len(icon) == 1
         self.icon = icon
@@ -24,6 +31,14 @@ class NPC(ABC, GameObject):
         self.states = states
         self.current_state = current_state
         self.location = location
+        self.inventory = inventory
+
+        # trade comments
+
+        self.trade_as_buyer = trade_as_buyer
+        self.trade_as_seller = trade_as_seller
+        self.trade_success = trade_success
+        self.trade_fail = trade_fail
 
     def update(self) -> None:
         pass
@@ -51,7 +66,12 @@ class Farmer(NPC):
         super().__init__(
             "The Farmer",
             "%",
-            {"start": "Hope you're ready to kill some PESTERLY EVIL rats!"},
+            {
+                "start": "Hope you're ready to kill some PESTERLY EVIL MUTANT rats!"
+            },
             "start",
             (25, 25),
+            trades=[(WHEAT, QUID)],
+            inventory={QUID: 1_000_000},
+            trade_as_buyer="Pfft - like you'd have anything decent to sell. Let's see anyway...",
         )

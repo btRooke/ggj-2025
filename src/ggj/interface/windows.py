@@ -33,11 +33,13 @@ class DialogueBox(InterfaceObject):
 
     def write(self, message: str):
         self._ww.clear()
+        self._ww.refresh()
         self._ww.move(0, 0)
         for i in range(len(message)):
             self._ww.addch(message[i])
             self._ww.refresh()
             time.sleep(0.015)
+        self._ww.refresh()
 
 
 class OptionsMenu(InterfaceObject):
@@ -77,18 +79,23 @@ class RightOptionsMenu(OptionsMenu):
         self._required_redraw = True
         self._health_percentage = 0.72
         self._diag_options: list[str] = []
+        self._options_label = ""
 
     def set_health(self, percentage: float) -> None:
         logger.info(f"health set to {percentage}")
         self._health_percentage = percentage
         self._required_redraw = True
 
-    def set_diag_option(self, options: list[str]):
+    def set_option_choices(
+        self, options: list[str], option_label="Dialogue Choices"
+    ):
         self._diag_options = options
+        self._options_label = option_label
         self.draw()
 
     def draw(self) -> None:
 
+        self._ww.clear()
         self._ww.move(0, 0)
 
         max = self._ww.getmaxyx()[1]
@@ -124,7 +131,7 @@ class RightOptionsMenu(OptionsMenu):
 
         if self._diag_options:
 
-            self._ww.addstr("Dialogue Choices\n", curses.A_BOLD)
+            self._ww.addstr(f"{self._options_label}\n", curses.A_BOLD)
 
             for i, o in enumerate(self._diag_options, start=1):
                 self._ww.addstr(f"{i}. {o}\n")
