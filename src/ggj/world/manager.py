@@ -1,4 +1,4 @@
-from typing import ClassVar, Optional, Dict
+from typing import ClassVar, Optional, Dict, Type, Set
 from curses import window
 from .gameobject import GameObject
 from .camera import Camera
@@ -75,3 +75,7 @@ class WorldManager:
         for obj in objs:
             logging.debug(f"Removed object {len(objs)}")
             WorldManager.objects.remove(obj)
+
+    @staticmethod
+    def get_objects_by_pred(types: Set[Type]) -> list[GameObject]:
+        return list(filter(lambda o: type(o) in types, WorldManager.objects))

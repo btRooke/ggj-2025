@@ -5,6 +5,9 @@ from .gameobject import GameObject
 import random
 import time
 
+SURROUNDING_VECTOR = [ (-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1),
+                      (0, 1), (1, 1), ]
+
 class Grass:
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
@@ -49,7 +52,6 @@ class Boundary:
     def impassable(self) -> bool:
         return True
 
-
 class Hole:
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
@@ -66,18 +68,7 @@ class Hole:
 
         # if cell next to current cell is a hole then replace the cel
         # with water after x number of seconds
-        surrounding_vector = [
-            (-1, -1),
-            (0, -1),
-            (1, -1),
-            (-1, 0),
-            (1, 0),
-            (-1, 1),
-            (0, 1),
-            (1, 1),
-        ]
-
-        for vec_x, vec_y in surrounding_vector:
+        for vec_x, vec_y in SURROUNDING_VECTOR:
             n_x, n_y = pos_x + vec_x, pos_y + vec_y
             objs = WorldManager.get_objects(n_x, n_y)
 
@@ -183,7 +174,6 @@ class PlantedSoil:
     def impassable(self) -> bool:
         return False
 
-
 class Wheat:
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
@@ -205,6 +195,30 @@ class Wheat:
     def impassable(self) -> bool:
         return False
 
+class Scarecrow:
+    def __init__(self, x: int, y: int):
+        self.pos = [x, y]
+
+    def _place_spikes(self):
+        pass
+
+    def update(self):
+        pass
+
+    def draw(self):
+        assert WorldManager.screen
+        x, y = self.pos
+        s.world_char(WorldManager.screen, x, y, "¥", s.PURPLE)
+
+    def get_pos(self) -> tuple[int, int]:
+        return self.pos[0], self.pos[1]
+
+    def zindex(self) -> int:
+        return 0
+
+    def impassable(self) -> bool:
+        return False
+
 class TerrainFactory:
     @staticmethod
     def create_terrain(world: list[list[str]]):
@@ -215,6 +229,7 @@ class TerrainFactory:
             "!": Soil,
             "^": PlantedSoil,
             "$": Wheat,
+            "¥": Scarecrow,
         }
 
         for y, row in enumerate(world):
