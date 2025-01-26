@@ -4,14 +4,12 @@ import sys
 import time
 from curses import window
 from pathlib import Path
+
 from mypy import api
 
-from ggj.world.item import SHOVEL, Item
+from ggj.world.npc import Farmer
+from .events import Events
 from .input import KeyboardListener
-from .world import terrain
-from .world import player
-from .world.camera import Camera
-from .events import Events, Event
 from .interface import InterfaceObject
 from .interface.windows import (
     WorldViewerBorder,
@@ -19,6 +17,9 @@ from .interface.windows import (
     LeftOptionsMenu,
     DialogueBox,
 )
+from .world import player
+from .world import terrain
+from .world.camera import Camera
 from .world.manager import WorldManager
 from .world.tiles import WORLD_TILES
 
@@ -101,6 +102,8 @@ def world_loop(stdscr: window):
 
     world_viewer_border.start_flashing("n")
 
+    WorldManager.add_object(Farmer(diag_box))
+
     def move(move_vector: tuple[int, int]):
         p.move(move_vector)
 
@@ -126,16 +129,8 @@ def world_loop(stdscr: window):
     world_window.refresh()
 
     # events
-    events = Events(
-        [
-            Event(
-                2,
-                lambda: diag_box.write(
-                    'Mysterious voice: "Welcome to the world, time to plant some vegetables. I hope nothing bad happens..."'
-                ),
-            )
-        ]
-    )
+    events = Events([])
+
     # main loop
     last_tick = 0.0
     last_game_tick = 0.0
