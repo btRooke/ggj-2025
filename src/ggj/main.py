@@ -29,7 +29,7 @@ from .world.tiles import WORLD_TILES
 logging.basicConfig(
     format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
     filename="ggj.log",
-    level=logging.INFO,
+    level=logging.DEBUG,
 )
 logger = logging.getLogger(__name__)
 PACKAGE_ROOT = Path(__file__).parent.resolve()
@@ -52,9 +52,6 @@ def _run_mypy() -> None:
 
 
 def world_loop(stdscr: window):
-
-    # curses stuff
-
     curses.use_default_colors()
     curses.start_color()
     curses.curs_set(False)
@@ -90,7 +87,6 @@ def world_loop(stdscr: window):
     WorldManager.add_object(p)
 
     # interface components
-
     diag_box = DialogueBox(stdscr, world_window.getmaxyx()[1])
     inv_box = LeftOptionsMenu(stdscr, world_window.getmaxyx()[1], p.inventory)
     right_box = RightOptionsMenu(stdscr, world_window.getmaxyx()[1])
