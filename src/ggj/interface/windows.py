@@ -144,8 +144,8 @@ class RightOptionsMenu(OptionsMenu):
                 self._ww.addstr(f"{i}. {o}\n")
 
         self._w.border()
-        self._w.noutrefresh()
-        self._ww.noutrefresh()
+        self._w.refresh()
+        self._ww.refresh()
 
 
 class LeftOptionsMenu(OptionsMenu):
