@@ -4,6 +4,7 @@ import sys
 import time
 from curses import window
 from pathlib import Path
+from threading import Thread
 
 from mypy import api
 
@@ -25,6 +26,7 @@ from .world import terrain
 from .world.camera import Camera
 from .world.manager import WorldManager
 from .world.tiles import WORLD_TILES
+
 
 logging.basicConfig(
     format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
@@ -104,7 +106,7 @@ def world_loop(stdscr: window):
     diag_box = DialogueBox(stdscr, world_window.getmaxyx()[1])
     inv_box = LeftOptionsMenu(stdscr, world_window.getmaxyx()[1], p.inventory)
     right_box = RightOptionsMenu(stdscr, world_window.getmaxyx()[1], stats)
-    right_box.set_health(0.43)  # TODO hook up health
+    right_box.set_health(1)
     world_viewer_border = WorldViewerBorder(stdscr, world_window)
     interface_components: list[InterfaceObject] = [
         world_viewer_border,
@@ -186,6 +188,10 @@ def world_loop(stdscr: window):
     world_window.clear()
     world_window.refresh()
 
+    # health
+    last_health_tick = time.monotonic()
+    health = 1.0
+
     # events
     events = Events([])
 
@@ -193,9 +199,15 @@ def world_loop(stdscr: window):
     last_tick = 0.0
     last_game_tick = 0.0
 
-    while True:
-        WorldManager.draw()
+    while health > 0:
+
         current_time = time.monotonic()
+        if time.monotonic() - last_health_tick > 2:
+            health -= 0.01
+            last_health_tick = current_time
+            right_box.set_health(health)
+
+        WorldManager.draw()
 
         if (time.monotonic() - last_game_tick) > (1 / GAME_TICK_FREQUENCY):
             WorldManager.update()
