@@ -1,12 +1,9 @@
 import curses
 import logging
 import time
-from curses import textpad
-from threading import Thread
-from typing import Any, override, Optional
+from typing_extensions import Any, Optional
 
 from . import InterfaceObject
-from ..world.item import Item
 from ..world.player import PlayerInventory
 
 logger = logging.getLogger(__name__)
@@ -190,7 +187,7 @@ class WorldViewerBorder(InterfaceObject):
             "s": curses.COLOR_WHITE,
             "w": curses.COLOR_RED,
         }
-        self._flashers: dict[str, Optional[Flasher]] = {
+        self._flashers: dict[str, Optional[float]] = {
             "n": None,
             "e": None,
             "s": None,
@@ -202,14 +199,43 @@ class WorldViewerBorder(InterfaceObject):
         if self._flashers[direction] is not None:
             return
         else:
-            f = Flasher(self, direction)
-            self._flashers[direction] = f
-            f.start()
+            self._flashers[direction] = 0
 
     def stop_flashing(self, direction: str) -> None:
-        if (f := self._flashers[direction]) is not None:
-            f.running = False
+        if self._flashers[direction] is None:
+            return
+        else:
             self._flashers[direction] = None
+
+    def update(self) -> None:
+
+        current_time = time.monotonic()
+
+        for direction in self._flashers:
+
+            # if flasher active
+
+            if (t := self._flashers[direction]) is not None:
+
+                # if time passed switch colour
+
+                if current_time - t > 0.35:
+
+                    if self.direction_colours[direction] == curses.COLOR_RED:
+                        self.direction_colours[direction] = curses.COLOR_WHITE
+                    else:
+                        self.direction_colours[direction] = curses.COLOR_RED
+
+                    self._flashers[direction] = current_time
+                    self._required_redraw = True
+
+            # if not and still red, go to white
+
+            elif self.direction_colours[direction] == curses.COLOR_RED:
+                self.direction_colours[direction] = curses.COLOR_WHITE
+                self._required_redraw = True
+
+        super().update()
 
     def draw(self) -> None:
         uly, ulx = 0, 0
@@ -225,29 +251,10 @@ class WorldViewerBorder(InterfaceObject):
         self._w.hline(lry, ulx + 1, curses.ACS_HLINE, lrx - ulx - 1)
         self._w.attron(curses.color_pair(self.direction_colours["e"]))
         self._w.vline(uly + 1, lrx, curses.ACS_VLINE, lry - uly - 1)
+        self._w.attron(curses.color_pair(curses.COLOR_WHITE))
         self._w.addch(uly, ulx, curses.ACS_ULCORNER)
         self._w.addch(uly, lrx, curses.ACS_URCORNER)
         self._w.addch(lry, lrx, curses.ACS_LRCORNER)
         self._w.addch(lry, ulx, curses.ACS_LLCORNER)
 
-        self._w.refresh()
-
-
-class Flasher(Thread):
-
-    def __init__(self, world_border: WorldViewerBorder, direction: str):
-        super().__init__()
-        self._wb = world_border
-        self.running = True
-        assert direction in ["n", "e", "w", "s"]
-        self._direction = direction
-
-    @override
-    def run(self):
-        while self.running:
-            self._wb.direction_colours[self._direction] = curses.COLOR_RED
-            self._wb._required_redraw = True
-            time.sleep(0.25)
-            self._wb.direction_colours[self._direction] = curses.COLOR_WHITE
-            self._wb._required_redraw = True
-            time.sleep(0.25)
+        self._w.noutrefresh()

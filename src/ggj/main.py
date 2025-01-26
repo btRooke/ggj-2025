@@ -99,7 +99,7 @@ def world_loop(stdscr: window):
         diag_box,
     ]
 
-    world_viewer_border.start_flashing("w")
+    world_viewer_border.start_flashing("n")
 
     def move(move_vector: tuple[int, int]):
         p.move(move_vector)
@@ -142,13 +142,12 @@ def world_loop(stdscr: window):
 
     while True:
         WorldManager.draw()
-        for c in interface_components:
-            c.update()
-
         current_time = time.monotonic()
 
         if (time.monotonic() - last_game_tick) > (1 / GAME_TICK_FREQUENCY):
             WorldManager.update()
+            for c in interface_components:
+                c.update()
 
         if (time.monotonic() - last_tick) < (1 / EVENT_TICK_FREQUENCY):
             continue
