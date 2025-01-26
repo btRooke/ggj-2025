@@ -1,8 +1,10 @@
 from typing import ClassVar, Optional, Dict, Type, Set
 from curses import window
-from .gameobject import GameObject
+from .gameobject import GameObject, Collidable
 from .camera import Camera
 import logging
+
+logger = logging.getLogger(__name__)
 
 def is_visible(o: GameObject):
     assert WorldManager.screen
@@ -12,6 +14,7 @@ def is_visible(o: GameObject):
 
     return abs(pos_x - cam_x) < viewport / 2 and abs(pos_y - cam_y) < viewport / 2
 
+
 class WorldManager:
     objects: ClassVar[list[GameObject]] = []
     screen: ClassVar[Optional[window]] = None
@@ -19,6 +22,7 @@ class WorldManager:
     @staticmethod
     def add_object(obj: GameObject):
         WorldManager.objects.append(obj)
+        logger.debug(f"added {obj} to world")
 
     @staticmethod
     def update():
@@ -26,6 +30,26 @@ class WorldManager:
 
         for obj in WorldManager.objects:
             obj.update()
+
+    @staticmethod
+    def get_collisions() -> dict[tuple[int, int], list[GameObject]]:
+        """Currently unused..."""
+
+        collidables = [
+            o for o in WorldManager.objects if isinstance(o, Collidable)
+        ]
+        locations = set(o.get_pos() for o in collidables)
+        locations_to_objects = {
+            l: [o for o in collidables if o.get_pos() == l] for l in locations
+        }
+        collisions = {
+            k: v for k, v in locations_to_objects.items() if len(v) > 1
+        }
+
+        if collisions:
+            logger.info(f"collisions {collisions}")
+
+        return collisions  # type: ignore
 
     @staticmethod
     def draw():
@@ -41,7 +65,7 @@ class WorldManager:
             objs = coord_dict.get((x, y), [])
             objs.append(obj)
             objs.sort(key=lambda o: -o.zindex())
-            coord_dict[(x,y)] = objs
+            coord_dict[(x, y)] = objs
 
         for objs in coord_dict.values():
             for obj in objs:
@@ -52,20 +76,26 @@ class WorldManager:
         WorldManager.screen = screen
 
     @staticmethod
-    def _get_impassable_objects(x: int, y:int) -> list[GameObject]:
-        return list(filter(lambda o: o.get_pos() == (x, y) and o.impassable(),
-                           WorldManager.objects))
+    def _get_impassable_objects(x: int, y: int) -> list[GameObject]:
+        return list(
+            filter(
+                lambda o: o.get_pos() == (x, y) and o.impassable(),
+                WorldManager.objects,
+            )
+        )
 
     @staticmethod
     def get_objects(x: int, y: int) -> list[GameObject]:
-        return list(filter(lambda o: o.get_pos() == (x, y),
-                           WorldManager.objects))
+        return list(
+            filter(lambda o: o.get_pos() == (x, y), WorldManager.objects)
+        )
 
     """
     Determine if the given square is 'placeable'. Meaning that
     an object can be put on the square or the player can move
     to the square.
     """
+
     @staticmethod
     def can_place(x: int, y: int) -> int:
         return len(WorldManager._get_impassable_objects(x, y)) == 0

@@ -4,15 +4,14 @@ import sys
 import time
 from curses import window
 from pathlib import Path
+
 from mypy import api
 
-from ggj.world.item import SHOVEL, Item
+from ggj.interface.conversation import converse
+from ggj.world.npc import Farmer, NPC
+from ggj.world.terrain import SURROUNDING_VECTOR
+from .events import Events
 from .input import KeyboardListener
-from .world import terrain
-from .world import player
-from .world import rat
-from .world.camera import Camera
-from .events import Events, Event
 from .interface import InterfaceObject
 from .interface.windows import (
     WorldViewerBorder,
@@ -20,13 +19,17 @@ from .interface.windows import (
     LeftOptionsMenu,
     DialogueBox,
 )
+from .world import player
+from .world import rat
+from .world import terrain
+from .world.camera import Camera
 from .world.manager import WorldManager
 from .world.tiles import WORLD_TILES
 
 logging.basicConfig(
     format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
     filename="ggj.log",
-    level=logging.DEBUG,
+    level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
 PACKAGE_ROOT = Path(__file__).parent.resolve()
@@ -86,7 +89,7 @@ def world_loop(stdscr: window):
     p = player.Player(player_start_x, player_start_y)
     WorldManager.add_object(p)
 
-        # interface components
+    # interface components
 
     diag_box = DialogueBox(stdscr, world_window.getmaxyx()[1])
     inv_box = LeftOptionsMenu(stdscr, world_window.getmaxyx()[1], p.inventory)
@@ -115,6 +118,8 @@ def world_loop(stdscr: window):
     rat_overseer.set_on_all_rats(lambda: set_rat_indicators(set()))
     rat_overseer.set_on_rat_hidden(lambda dirs: set_rat_indicators(dirs))
 
+    WorldManager.add_object(Farmer(diag_box))
+
     def move(move_vector: tuple[int, int]):
         p.move(move_vector)
 
@@ -127,6 +132,19 @@ def world_loop(stdscr: window):
         r = rat.Rat(p_x, p_y)
         WorldManager.add_object(r)
 
+    def talk_to_npc():
+        pj, pi = p.get_pos()
+        surrounding = [(sj + pj, si + pi) for (si, sj) in SURROUNDING_VECTOR]
+        npc = list(
+            filter(
+                lambda o: isinstance(o, NPC) and o.get_pos() in surrounding,
+                WorldManager.objects,
+            )
+        )
+        if len(npc) < 1:
+            return
+        converse(npc[0], diag_box, right_box, il)
+
     il = KeyboardListener(stdscr)
     il.callbacks["a"] = lambda: move((-1, 0))
     il.callbacks["d"] = lambda: move((1, 0))
@@ -135,6 +153,7 @@ def world_loop(stdscr: window):
     il.callbacks["x"] = lambda: p.execute()
     il.callbacks["e"] = swap_item
     il.callbacks["r"] = place_rat
+    il.callbacks["t"] = talk_to_npc
 
     # put rocks in
     world_window.nodelay(True)
@@ -146,16 +165,8 @@ def world_loop(stdscr: window):
     world_window.refresh()
 
     # events
-    events = Events(
-        [
-            Event(
-                2,
-                lambda: diag_box.write(
-                    'Mysterious voice: "Welcome to the world, time to plant some vegetables. I hope nothing bad happens..."'
-                ),
-            )
-        ]
-    )
+    events = Events([])
+
     # main loop
     last_tick = 0.0
     last_game_tick = 0.0
