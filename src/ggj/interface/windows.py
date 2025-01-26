@@ -55,23 +55,6 @@ class OptionsMenu(InterfaceObject):
             OptionsMenu.HEIGHT - 4, OptionsMenu.WIDTH - 8, 2, 4
         )
 
-    def draw(self) -> None:
-
-        self._ww.move(0, 0)
-
-        for i, k in enumerate(self.options):
-
-            if i != 0:
-                self._ww.addstr("\n\n")
-
-            self._ww.addstr(k, curses.A_BOLD)
-            self._ww.addstr("\n")
-            self._ww.addstr(str(self.options[k]))
-
-        self._w.border()
-        self._w.refresh()
-        self._ww.refresh()
-
 
 class RightOptionsMenu(OptionsMenu):
 
@@ -88,11 +71,48 @@ class RightOptionsMenu(OptionsMenu):
             ),
         )
         self.options = {
+            "TODO implement this": 0,
             "🌾 Plants planted": 42,
             "💸 Quids": 12,
             "🐛 Mutant Rats killed": 1,
         }
         self._required_redraw = True
+        self._health_percentage = 0.72
+
+    def set_health(self, percentage: float) -> None:
+        self._health_percentage = percentage
+        self._required_redraw = True
+
+    def draw(self) -> None:
+
+        self._ww.move(0, 0)
+
+        max = self._ww.getmaxyx()[1]
+        lower = int(self._health_percentage * max)
+        higher = max - lower
+        self._ww.addstr("Health\n", curses.A_BOLD)
+        self._ww.addstr("=" * lower, curses.color_pair(curses.COLOR_RED))
+        self._ww.addstr("=" * higher, curses.color_pair(curses.COLOR_BLACK))
+        self._ww.addstr("\n")
+
+        # line
+
+        self._ww.addstr(("─" * (self._ww.getmaxyx()[1]) + "\n"))
+
+        # options
+
+        for i, k in enumerate(self.options):
+
+            if i != 0:
+                self._ww.addstr("\n\n")
+
+            self._ww.addstr(k, curses.A_BOLD)
+            self._ww.addstr("\n")
+            self._ww.addstr(str(self.options[k]))
+
+        self._w.border()
+        self._w.refresh()
+        self._ww.refresh()
 
 
 class LeftOptionsMenu(OptionsMenu):
@@ -128,8 +148,8 @@ class LeftOptionsMenu(OptionsMenu):
 
         if self.inventory.active_item:
             assert (
-               "wieldable" in self.inventory.active_item.traits or
-               "placeable" in self.inventory.active_item.traits
+                "wieldable" in self.inventory.active_item.traits
+                or "placeable" in self.inventory.active_item.traits
             )
 
         # line

@@ -33,6 +33,7 @@ PACKAGE_ROOT = Path(__file__).parent.resolve()
 GAME_TICK_FREQUENCY = 30
 EVENT_TICK_FREQUENCY = 10
 
+
 def _run_mypy() -> None:
     """
     Run Tim's mypy checker on the package before the game starts.
@@ -88,9 +89,11 @@ def world_loop(stdscr: window):
 
     diag_box = DialogueBox(stdscr, world_window.getmaxyx()[1])
     inv_box = LeftOptionsMenu(stdscr, world_window.getmaxyx()[1], p.inventory)
+    right_box = RightOptionsMenu(stdscr, world_window.getmaxyx()[1])
+    right_box.set_health(0.43)  # TODO hook up health
     interface_components: list[InterfaceObject] = [
         WorldViewerBorder(stdscr, world_window),
-        RightOptionsMenu(stdscr, world_window.getmaxyx()[1]),
+        right_box,
         inv_box,
         diag_box,
     ]
