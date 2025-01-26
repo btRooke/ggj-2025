@@ -100,7 +100,20 @@ def world_loop(stdscr: window):
         diag_box,
     ]
 
-    world_viewer_border.start_flashing("n")
+    rat_overseer = rat.RatOverseer()
+    WorldManager.add_object(rat_overseer)
+
+    def set_rat_indicators(rat_dirs: set[str]):
+        dirs = {'n', 'e', 's', 'w'}
+
+        for d in rat_dirs:
+            world_viewer_border.start_flashing(d)
+
+        for d in dirs - rat_dirs:
+            world_viewer_border.stop_flashing(d)
+
+    rat_overseer.set_on_all_rats(lambda: set_rat_indicators(set()))
+    rat_overseer.set_on_rat_hidden(lambda dirs: set_rat_indicators(dirs))
 
     def move(move_vector: tuple[int, int]):
         p.move(move_vector)
