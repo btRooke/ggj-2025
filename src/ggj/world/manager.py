@@ -6,6 +6,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def is_visible(o: GameObject):
+    assert WorldManager.screen
+    pos_x, pos_y = o.get_pos()
+    cam_x, cam_y = Camera.get_pos()
+    viewport, _ = WorldManager.screen.getmaxyx()
+
+    return abs(pos_x - cam_x) < viewport / 2 and abs(pos_y - cam_y) < viewport / 2
+
 
 class WorldManager:
     objects: ClassVar[list[GameObject]] = []
@@ -109,3 +117,12 @@ class WorldManager:
     @staticmethod
     def get_objects_of_type(types: Set[Type]) -> list[GameObject]:
         return list(filter(lambda o: type(o) in types, WorldManager.objects))
+
+    @staticmethod
+    def get_visible_objects() -> list[GameObject]:
+        return list((o for o in WorldManager.objects if is_visible(o)))
+
+    @staticmethod
+    def get_out_of_sight_objects() -> list[GameObject]:
+        return list((o for o in WorldManager.objects if not is_visible(o)))
+
