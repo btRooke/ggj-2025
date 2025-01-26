@@ -87,7 +87,7 @@ def world_loop(stdscr: window):
     p = player.Player(player_start_x, player_start_y)
     WorldManager.add_object(p)
 
-        # interface components
+    # interface components
 
     diag_box = DialogueBox(stdscr, world_window.getmaxyx()[1])
     inv_box = LeftOptionsMenu(stdscr, world_window.getmaxyx()[1], p.inventory)

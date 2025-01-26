@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 class WorldManager:
     objects: ClassVar[list[GameObject]] = []
     screen: ClassVar[Optional[window]] = None
+    last_collisions: ClassVar[dict[tuple[int, int], list[GameObject]]]
 
     @staticmethod
     def add_object(obj: GameObject):
@@ -25,6 +26,7 @@ class WorldManager:
 
     @staticmethod
     def get_collisions() -> dict[tuple[int, int], list[GameObject]]:
+        """Currently unused..."""
 
         collidables = [
             o for o in WorldManager.objects if isinstance(o, Collidable)
