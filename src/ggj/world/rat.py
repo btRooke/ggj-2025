@@ -2,9 +2,9 @@ from typing_extensions import Optional, Callable
 import heapq
 import time
 from .manager import WorldManager
-from .terrain import Wheat, PlantedSoil
+from .terrain import Wheat, PlantedSoil, Grass
 from ..drawing import shape as s
-from .gameobject import GameObject, GameObjectUtils
+from .gameobject import GameObject, GameObjectUtils, Collidable
 import logging
 from .camera import Camera
 
@@ -20,6 +20,8 @@ def next_step(start: tuple[int, int], destination: tuple[int, int]) -> tuple[int
     frontier = [(0, start)]
     dest_x, dest_y = destination
     came_from: dict[tuple[int, int], tuple[int, int]] = dict()
+
+    current = start
 
     while len(frontier):
         priority, current = heapq.heappop(frontier)
@@ -43,10 +45,13 @@ def next_step(start: tuple[int, int], destination: tuple[int, int]) -> tuple[int
             heapq.heappush(frontier, (priority, (new_x, new_y)))
             came_from[(new_x, new_y)] = current
 
-    backtrack = destination
+    backtrack = current
 
     if not len(came_from):
         return destination
+
+    if backtrack not in came_from:
+        return start
 
     while came_from[backtrack] != start:
         backtrack = came_from[backtrack]
@@ -55,7 +60,7 @@ def next_step(start: tuple[int, int], destination: tuple[int, int]) -> tuple[int
 
 STEP_INTERVAL = .5
 
-class Rat:
+class Rat(Collidable):
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
         self.target_pos: Optional[tuple[int, int]]
@@ -106,6 +111,13 @@ class Rat:
     def get_pos(self) -> tuple[int, int]:
         return self.pos[0], self.pos[1]
 
+    def on_collide(self, object: GameObject):
+        if isinstance(object, Wheat):
+            x, y = self.get_pos()
+            WorldManager.clear_cell(x, y)
+            WorldManager.add_object(Grass(x,y))
+
+
 class RatOverseer:
     def __init__(self):
         self.on_rat_hidden: Callable[[set[str]], None] = lambda _: None
@@ -142,7 +154,7 @@ class RatOverseer:
     def update(self):
         out_of_sight = (o for o in WorldManager.get_out_of_sight_objects() if isinstance(o, Rat))
 
-        if not next(out_of_sight, None):
+        if next(out_of_sight, None) == None:
             self.on_all_rats()
             return
 

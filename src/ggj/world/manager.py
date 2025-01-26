@@ -31,25 +31,42 @@ class WorldManager:
         for obj in WorldManager.objects:
             obj.update()
 
+        WorldManager._process_collisions()
+
     @staticmethod
-    def get_collisions() -> dict[tuple[int, int], list[GameObject]]:
-        """Currently unused..."""
+    def _group_by_position() -> dict[tuple[int, int], list[GameObject]]:
+        coord_dict: Dict[tuple[int, int], list[GameObject]] = dict()
 
-        collidables = [
-            o for o in WorldManager.objects if isinstance(o, Collidable)
-        ]
-        locations = set(o.get_pos() for o in collidables)
-        locations_to_objects = {
-            l: [o for o in collidables if o.get_pos() == l] for l in locations
-        }
-        collisions = {
-            k: v for k, v in locations_to_objects.items() if len(v) > 1
-        }
+        for obj in WorldManager.objects:
+            x, y = obj.get_pos()
+            objs = coord_dict.get((x, y), [])
+            objs.append(obj)
+            objs.sort(key=lambda o: -o.zindex())
+            coord_dict[(x, y)] = objs
 
-        if collisions:
-            logger.info(f"collisions {collisions}")
 
-        return collisions  # type: ignore
+        return coord_dict
+
+    @staticmethod
+    def _process_collisions():
+        coord_dict = WorldManager._group_by_position()
+
+        for pos_x, pos_y in coord_dict:
+            collidables = list((o for o in coord_dict[(pos_x, pos_y)] if isinstance(o, Collidable)))
+            all_objects = coord_dict[(pos_x, pos_y)]
+
+            if len(collidables) == 0:
+                continue
+
+            for i in range(len(collidables)):
+                for j in range (len(all_objects)):
+                    o1 = collidables[i]
+                    o2 = all_objects[j]
+
+                    if o1 == o2:
+                        continue
+
+                    o1.on_collide(o2)
 
     @staticmethod
     def draw():
@@ -58,7 +75,7 @@ class WorldManager:
 
         WorldManager.screen.refresh()
 
-        coord_dict: Dict[tuple[int, int], list[GameObject]] = dict()
+        coord_dict: Dict[tuple[int, int], list[GameObject]] = WorldManager._group_by_position()
 
         for obj in WorldManager.objects:
             x, y = obj.get_pos()
