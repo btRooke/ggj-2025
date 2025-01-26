@@ -1,26 +1,31 @@
 import curses
 import curses.textpad as text
+import logging
 from curses import window
 from ..world.camera import Camera
 
-GREEN=108
-DEEP_GREEN=106
-DARK_GREEN=22
-DARK_RED=88
-DEEP_BLUE=21
-GLISTEN_BLUE=39
-LIGHT_BROWN=136
-LIGHT_YELLOW=184
-GOLDEN=178
-MAROON=52
-BLOOD_RED=52
-HOT_PINK=132
-PURPLE=129
+GREEN = 108
+DEEP_GREEN = 106
+DARK_GREEN = 22
+DARK_RED = 88
+DEEP_BLUE = 21
+GLISTEN_BLUE = 39
+LIGHT_BROWN = 136
+LIGHT_YELLOW = 184
+GOLDEN = 178
+MAROON = 52
+BLOOD_RED = 52
+HOT_PINK = 132
+PURPLE = 129
+
+logger = logging.getLogger(__name__)
+
 
 def rect(
     win: window, start_x: int, start_y: int, end_x: int, end_y: int
 ) -> None:
     text.rectangle(win, start_y, start_x, end_y, end_x)
+
 
 def world_rect(win: window, start_x: int, start_y: int, end_x: int, end_y: int):
     cam_x, cam_y = Camera.get_pos()
@@ -54,7 +59,6 @@ def world_char(
 
     screen_x = (start_x - cam_x) * 2
     screen_y = start_y - cam_y
-
 
     if screen_x < 0 or screen_x > max_width - 1:
         return

@@ -66,7 +66,9 @@ class Farmer(NPC):
         super().__init__(
             "The Farmer",
             "%",
-            {"start": "Hope you're ready to kill some PESTERLY EVIL rats!"},
+            {
+                "start": "Hope you're ready to kill some PESTERLY EVIL MUTANT rats!"
+            },
             "start",
             (25, 25),
             trades=[(WHEAT, QUID)],

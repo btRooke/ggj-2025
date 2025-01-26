@@ -47,10 +47,8 @@ class Conversations:
 
         # check trade
 
-        if sellers_item not in seller:
-            return False
-
-        if buyers_item not in buyer:
+        if sellers_item not in seller or buyers_item not in buyer:
+            curses.beep()
             return False
 
         assert seller[sellers_item] >= 1

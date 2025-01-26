@@ -10,6 +10,7 @@ from mypy import api
 from ggj.interface.conversation import Conversations
 from ggj.world.item import WHEAT
 from ggj.world.npc import Farmer, NPC
+from ggj.world.rat import Rat
 from ggj.world.terrain import SURROUNDING_VECTOR
 from .events import Events
 from .input import KeyboardListener
@@ -139,11 +140,10 @@ def world_loop(stdscr: window):
         WorldManager.add_object(r)
 
     def talk_to_npc():
-        pj, pi = p.get_pos()
-        surrounding = [(sj + pj, si + pi) for (si, sj) in SURROUNDING_VECTOR]
         npc = list(
             filter(
-                lambda o: isinstance(o, NPC) and o.get_pos() in surrounding,
+                lambda o: isinstance(o, NPC)
+                and o.get_pos() in p.get_surrounding(),
                 WorldManager.objects,
             )
         )

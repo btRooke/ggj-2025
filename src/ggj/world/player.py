@@ -1,12 +1,22 @@
 import curses
 import logging
+import time
 from dataclasses import dataclass, field
 from typing import Optional
 from .camera import Camera
 from .gameobject import GameObject, Collidable
 from .item import Item, SHOVEL, WOODEN_STICK, SEEDS, SCYTHE
 from .manager import WorldManager
-from .terrain import Hole, Soil, Water, PlantedSoil, Wheat, Grass
+from .rat import Rat
+from .terrain import (
+    Hole,
+    Soil,
+    Water,
+    PlantedSoil,
+    Wheat,
+    Grass,
+    SURROUNDING_VECTOR,
+)
 from ..drawing import shape as s
 
 MOVE_CAMERA_COLS = 5
@@ -70,15 +80,38 @@ class Player(Collidable):
         self.inventory.inventory[SCYTHE] = 1
         self.inventory.active_item = SHOVEL
 
+        # whack animation
+        self._whack_animation_start: Optional[float] = None
+
         # item actions
         self.item_actions = {
             SHOVEL: self.dig,
             SEEDS: self.place,
             SCYTHE: self.cultivate,
+            WOODEN_STICK: self.whack,
         }
 
     def update(self):
-        pass
+
+        # whack animation disable after a while
+
+        if (
+            self._whack_animation_start is not None
+            and time.monotonic() - self._whack_animation_start > 0.25
+        ):
+            self._whack_animation_start = None
+
+    def whack(self):
+        self._trigger_whack_animation()
+        rats = list(
+            filter(
+                lambda o: isinstance(o, Rat)
+                and o.get_pos() in self.get_surrounding(),
+                WorldManager.objects,
+            )
+        )
+        for rat in rats:
+            WorldManager.objects.remove(rat)
 
     def dig(self):
         x, y = self.get_pos()
@@ -144,9 +177,15 @@ class Player(Collidable):
         assert WorldManager.screen
         x, y = self.pos
         s.world_char(WorldManager.screen, x, y, "#", s.DARK_RED)
+        if self._whack_animation_start is not None:
+            s.world_char(WorldManager.screen, x, y, "X", curses.A_BLINK)
 
     def get_pos(self) -> tuple[int, int]:
         return self.pos[0], self.pos[1]
+
+    def get_surrounding(self) -> tuple[tuple[int, int]]:
+        pj, pi = self.get_pos()
+        return tuple((sj + pj, si + pi) for (si, sj) in SURROUNDING_VECTOR)  # type: ignore
 
     def zindex(self) -> int:
         return -10
@@ -197,3 +236,8 @@ class Player(Collidable):
             self.inventory.inventory[item] += 1
         else:
             self.inventory.inventory[item] = 1
+
+    def _trigger_whack_animation(self):
+        if self._whack_animation_start:
+            return
+        self._whack_animation_start = time.monotonic()
