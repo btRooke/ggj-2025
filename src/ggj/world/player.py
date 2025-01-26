@@ -53,7 +53,6 @@ class PlayerInventory:
         else:
             self.inventory[item] = number
 
-
 class Player(Collidable):
     def __init__(self, x: int, y: int):
         self.pos: list[int] = [x, y]

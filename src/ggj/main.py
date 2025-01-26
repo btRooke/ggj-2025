@@ -1,4 +1,9 @@
 import curses
+from .world import terrain
+from .world import player
+from .world import rat
+from .world.camera import Camera
+from .events import Events, Event
 import logging
 import sys
 import time
@@ -26,7 +31,7 @@ from .world.tiles import WORLD_TILES
 logging.basicConfig(
     format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
     filename="ggj.log",
-    level=logging.INFO,
+    level=logging.DEBUG,
 )
 logger = logging.getLogger(__name__)
 PACKAGE_ROOT = Path(__file__).parent.resolve()
@@ -86,7 +91,7 @@ def world_loop(stdscr: window):
     p = player.Player(player_start_x, player_start_y)
     WorldManager.add_object(p)
 
-    # interface components
+        # interface components
 
     diag_box = DialogueBox(stdscr, world_window.getmaxyx()[1])
     inv_box = LeftOptionsMenu(stdscr, world_window.getmaxyx()[1], p.inventory)
@@ -111,6 +116,11 @@ def world_loop(stdscr: window):
         p.inventory.next_active()
         inv_box._required_redraw = True
 
+    def place_rat():
+        p_x, p_y = p.get_pos()
+        r = rat.Rat(p_x, p_y)
+        WorldManager.add_object(r)
+
     il = KeyboardListener(stdscr)
     il.callbacks["a"] = lambda: move((-1, 0))
     il.callbacks["d"] = lambda: move((1, 0))
@@ -118,6 +128,7 @@ def world_loop(stdscr: window):
     il.callbacks["w"] = lambda: move((0, -1))
     il.callbacks["x"] = lambda: p.execute()
     il.callbacks["e"] = swap_item
+    il.callbacks["r"] = place_rat
 
     # put rocks in
     world_window.nodelay(True)

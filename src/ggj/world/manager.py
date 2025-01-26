@@ -1,4 +1,4 @@
-from typing import ClassVar, Optional, Dict
+from typing import ClassVar, Optional, Dict, Type, Set
 from curses import window
 from .gameobject import GameObject, Collidable
 from .camera import Camera
@@ -67,13 +67,9 @@ class WorldManager:
         WorldManager.screen = screen
 
     @staticmethod
-    def _get_impassable_objects(x: int, y: int) -> list[GameObject]:
-        return list(
-            filter(
-                lambda o: o.get_pos() == (x, y) and not o.impassable(),
-                WorldManager.objects,
-            )
-        )
+    def _get_impassable_objects(x: int, y:int) -> list[GameObject]:
+        return list(filter(lambda o: o.get_pos() == (x, y) and o.impassable(),
+                           WorldManager.objects))
 
     @staticmethod
     def get_objects(x: int, y: int) -> list[GameObject]:
@@ -89,7 +85,7 @@ class WorldManager:
 
     @staticmethod
     def can_place(x: int, y: int) -> int:
-        return len(WorldManager._get_impassable_objects(x, y)) > 0
+        return len(WorldManager._get_impassable_objects(x, y)) == 0
 
     @staticmethod
     def clear_cell(x: int, y: int):
@@ -97,10 +93,14 @@ class WorldManager:
         clear all objects in the given location that is not the player
         """
         assert WorldManager.screen
-        objs = WorldManager._get_impassable_objects(x, y)
+        objs = WorldManager.get_objects(x, y)
         # all terrain is at zindex 0
         objs = list(filter(lambda o: o.zindex() == 0, objs))
 
         for obj in objs:
             logging.debug(f"Removed object {len(objs)}")
             WorldManager.objects.remove(obj)
+
+    @staticmethod
+    def get_objects_of_type(types: Set[Type]) -> list[GameObject]:
+        return list(filter(lambda o: type(o) in types, WorldManager.objects))
