@@ -7,7 +7,7 @@ from ..drawing import shape as s
 from ..interface.windows import DialogueBox
 
 
-class NPC(ABC, GameObject, Collidable):
+class NPC(ABC, GameObject):
 
     def __init__(
         self,
@@ -45,15 +45,16 @@ class NPC(ABC, GameObject, Collidable):
         return False
 
     @abstractmethod
-    def on_collide(self, object: GameObject): ...
+    def chat(self) -> None: ...
 
 
 class Farmer(NPC):
 
-    def on_collide(self, object: GameObject):
-        self._diag_box.write(self.states[self.current_state])
+    def chat(self) -> None:
+        self._diag_box.write(self.name + ": " + self.states[self.current_state])
 
     def __init__(self, diag_box: DialogueBox):
+        self._diag_box = diag_box
         super().__init__(
             "The Farmer",
             "%",
@@ -61,4 +62,3 @@ class Farmer(NPC):
             "start",
             (25, 25),
         )
-        self._diag_box = diag_box

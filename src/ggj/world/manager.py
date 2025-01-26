@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 class WorldManager:
     objects: ClassVar[list[GameObject]] = []
     screen: ClassVar[Optional[window]] = None
-    last_collisions: ClassVar[dict[tuple[int, int], list[GameObject]]]
 
     @staticmethod
     def add_object(obj: GameObject):

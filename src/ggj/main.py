@@ -7,7 +7,8 @@ from pathlib import Path
 
 from mypy import api
 
-from ggj.world.npc import Farmer
+from ggj.world.npc import Farmer, NPC
+from ggj.world.terrain import SURROUNDING_VECTOR
 from .events import Events
 from .input import KeyboardListener
 from .interface import InterfaceObject
@@ -117,6 +118,19 @@ def world_loop(stdscr: window):
         r = rat.Rat(p_x, p_y)
         WorldManager.add_object(r)
 
+    def talk_to_npc():
+        pj, pi = p.get_pos()
+        surrounding = [(sj + pj, si + pi) for (si, sj) in SURROUNDING_VECTOR]
+        npc = list(
+            filter(
+                lambda o: isinstance(o, NPC) and o.get_pos() in surrounding,
+                WorldManager.objects,
+            )
+        )
+        if len(npc) < 1:
+            return
+        npc[0].chat()
+
     il = KeyboardListener(stdscr)
     il.callbacks["a"] = lambda: move((-1, 0))
     il.callbacks["d"] = lambda: move((1, 0))
@@ -125,6 +139,7 @@ def world_loop(stdscr: window):
     il.callbacks["x"] = lambda: p.execute()
     il.callbacks["e"] = swap_item
     il.callbacks["r"] = place_rat
+    il.callbacks["t"] = talk_to_npc
 
     # put rocks in
     world_window.nodelay(True)
