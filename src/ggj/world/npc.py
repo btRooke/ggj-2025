@@ -57,7 +57,7 @@ class NPC(ABC, GameObject):
         return -1
 
     def impassable(self) -> bool:
-        return False
+        return True
 
 
 class Farmer(NPC):
