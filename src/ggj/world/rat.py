@@ -62,7 +62,7 @@ class Rat:
         self.last_step_time = 0
 
     def _find_nearest_crop(self):
-        crops = WorldManager.get_objects_by_pred({ Wheat, PlantedSoil })
+        crops = WorldManager.get_objects_of_type({ Wheat, PlantedSoil })
         crops.sort(key=lambda o: GameObjectUtils.distance(self, o))
 
         if not len(crops):
