@@ -12,7 +12,7 @@ class Item:
 
 SHOVEL = Item("Shovel", ["wieldable"])
 WOODEN_STICK = Item("Wooden Stick", ["wieldable", "weapon"])
-SEEDS = Item("Seed", ["placeable"])
+SEEDS = Item("Seed", ["placeable", "wieldable"])
 SCYTHE = Item("Scythe", ["wieldable"])
 WHEAT = Item("Wheat")
 QUID = Item("Quid")
