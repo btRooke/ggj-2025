@@ -40,7 +40,7 @@ class WorldManager:
         if collisions:
             logger.info(f"collisions {collisions}")
 
-        return collisions
+        return collisions  # type: ignore
 
     @staticmethod
     def draw():
@@ -67,9 +67,13 @@ class WorldManager:
         WorldManager.screen = screen
 
     @staticmethod
-    def _get_impassable_objects(x: int, y:int) -> list[GameObject]:
-        return list(filter(lambda o: o.get_pos() == (x, y) and o.impassable(),
-                           WorldManager.objects))
+    def _get_impassable_objects(x: int, y: int) -> list[GameObject]:
+        return list(
+            filter(
+                lambda o: o.get_pos() == (x, y) and o.impassable(),
+                WorldManager.objects,
+            )
+        )
 
     @staticmethod
     def get_objects(x: int, y: int) -> list[GameObject]:

@@ -1,9 +1,4 @@
 import curses
-from .world import terrain
-from .world import player
-from .world import rat
-from .world.camera import Camera
-from .events import Events, Event
 import logging
 import sys
 import time
@@ -23,6 +18,7 @@ from .interface.windows import (
     DialogueBox,
 )
 from .world import player
+from .world import rat
 from .world import terrain
 from .world.camera import Camera
 from .world.manager import WorldManager
@@ -31,7 +27,7 @@ from .world.tiles import WORLD_TILES
 logging.basicConfig(
     format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
     filename="ggj.log",
-    level=logging.DEBUG,
+    level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
 PACKAGE_ROOT = Path(__file__).parent.resolve()
