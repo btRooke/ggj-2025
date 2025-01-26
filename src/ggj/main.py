@@ -7,6 +7,7 @@ from pathlib import Path
 
 from mypy import api
 
+from ggj.interface.conversation import converse
 from ggj.world.npc import Farmer, NPC
 from ggj.world.terrain import SURROUNDING_VECTOR
 from .events import Events
@@ -129,7 +130,7 @@ def world_loop(stdscr: window):
         )
         if len(npc) < 1:
             return
-        npc[0].chat()
+        converse(npc[0], diag_box, right_box, il)
 
     il = KeyboardListener(stdscr)
     il.callbacks["a"] = lambda: move((-1, 0))

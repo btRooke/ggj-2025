@@ -44,17 +44,10 @@ class NPC(ABC, GameObject):
     def impassable(self) -> bool:
         return False
 
-    @abstractmethod
-    def chat(self) -> None: ...
-
 
 class Farmer(NPC):
 
-    def chat(self) -> None:
-        self._diag_box.write(self.name + ": " + self.states[self.current_state])
-
-    def __init__(self, diag_box: DialogueBox):
-        self._diag_box = diag_box
+    def __init__(self):
         super().__init__(
             "The Farmer",
             "%",
