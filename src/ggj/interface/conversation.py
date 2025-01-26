@@ -80,6 +80,7 @@ class Conversations:
             seller[buyers_item] = 1
 
         self.inv_box.draw()
+        logger.info(f"player sold {sellers_item} for {buyers_item}")
 
         return True
 
