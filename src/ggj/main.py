@@ -105,7 +105,7 @@ def world_loop(stdscr: window):
 
     world_viewer_border.start_flashing("n")
 
-    WorldManager.add_object(Farmer(diag_box))
+    WorldManager.add_object(Farmer())
 
     def move(move_vector: tuple[int, int]):
         p.move(move_vector)
