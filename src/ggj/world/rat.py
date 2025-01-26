@@ -1,12 +1,14 @@
-from typing_extensions import Optional, Callable
+from typing_extensions import Optional, Callable, Optional
 import heapq
 import time
 from .manager import WorldManager
-from .terrain import Wheat, PlantedSoil, Grass
+from .terrain import Wheat, Grass, CROP_STAGES
 from ..drawing import shape as s
 from .gameobject import GameObject, GameObjectUtils, Collidable
 import logging
 from .camera import Camera
+from ..events import Events, Event
+import random
 
 SURROUNDING_VECTOR = [ (-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1),
                       (0, 1), (1, 1), ]
@@ -69,16 +71,14 @@ class Rat(Collidable):
         self.on_out_of_sight: Optional[Callable[[set[str]], None]]
 
     def _find_nearest_crop(self):
-        crops = WorldManager.get_objects_of_type({ Wheat, PlantedSoil })
+        crops = WorldManager.get_objects_of_type(set(CROP_STAGES))
         crops.sort(key=lambda o: GameObjectUtils.distance(self, o))
 
         if not len(crops):
             self.target_pos = (self.pos[0], self.pos[1])
-            logging.debug("No crops founds")
             return
 
         self.target_pos = crops[0].get_pos()
-        logging.debug(f"Set targetpos: f{self.target_pos}")
 
     def update(self):
         assert self.target_pos
@@ -90,10 +90,15 @@ class Rat(Collidable):
         self._find_nearest_crop()
         next_pos = next_step(self.get_pos(), self.target_pos)
 
+        # TODO: have the rats moving away
+        if self.target_pos == tuple(self.pos):
+            other_items = WorldManager.get_objects(*self.pos)
+
+            if not next((o for o in other_items if type(other_items) in CROP_STAGES), None):
+                WorldManager.remove(self)
+
         self.pos[0] = next_pos[0]
         self.pos[1] = next_pos[1]
-
-        logging.debug(f"Moving to: f{self.pos}")
 
         self.last_step_time = time.monotonic()
 
@@ -117,11 +122,15 @@ class Rat(Collidable):
             WorldManager.clear_cell(x, y)
             WorldManager.add_object(Grass(x,y))
 
+RAT_ATTACK_TIME = 120
+START_RATS = 2
 
 class RatOverseer:
     def __init__(self):
         self.on_rat_hidden: Callable[[set[str]], None] = lambda _: None
         self.on_all_rats: Callable[[], None] = lambda: None
+        self.rat_attack_event: Events = Events([])
+        self.num_rounds = 0
 
     def _get_rat_direction(self, r: Rat) -> set[str]:
         assert WorldManager.screen
@@ -151,7 +160,29 @@ class RatOverseer:
 
         return directions
 
+    def rat_attack(self):
+        self.num_rounds += 1
+        for _ in range(round(START_RATS * (self.num_rounds * 0.5))):
+            grasses = WorldManager.get_objects_of_type({ Grass })
+            block = random.choice(grasses)
+            WorldManager.add_object(Rat(*block.get_pos()))
+
+
+    def _process_rat_attack(self):
+        if not self.rat_attack_event.done():
+            return
+
+        target_objs = WorldManager.get_objects_of_type(set(CROP_STAGES))
+
+        if not len(target_objs):
+            return
+
+        e = Event(RAT_ATTACK_TIME, self.rat_attack, False)
+        self.rat_attack_event = Events([e])
+
     def update(self):
+        self._process_rat_attack()
+        self.rat_attack_event.check()
         out_of_sight = (o for o in WorldManager.get_out_of_sight_objects() if isinstance(o, Rat))
 
         if next(out_of_sight, None) == None:

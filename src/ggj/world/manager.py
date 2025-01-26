@@ -1,4 +1,4 @@
-from typing import ClassVar, Optional, Dict, Type, Set
+from typing import ClassVar, Optional, Dict, Type, Set, Callable
 from curses import window
 from .gameobject import GameObject, Collidable
 from .camera import Camera
@@ -14,7 +14,6 @@ def is_visible(o: GameObject):
 
     return abs(pos_x - cam_x) < viewport / 2 and abs(pos_y - cam_y) < viewport / 2
 
-
 class WorldManager:
     objects: ClassVar[list[GameObject]] = []
     screen: ClassVar[Optional[window]] = None
@@ -28,10 +27,11 @@ class WorldManager:
     def update():
         Camera.update()
 
+        WorldManager._process_collisions()
+
         for obj in WorldManager.objects:
             obj.update()
 
-        WorldManager._process_collisions()
 
     @staticmethod
     def _group_by_position() -> dict[tuple[int, int], list[GameObject]]:
@@ -128,8 +128,11 @@ class WorldManager:
         objs = list(filter(lambda o: o.zindex() == 0, objs))
 
         for obj in objs:
-            logging.debug(f"Removed object {len(objs)}")
             WorldManager.objects.remove(obj)
+
+    @staticmethod
+    def remove(obj: GameObject):
+        WorldManager.objects.remove(obj)
 
     @staticmethod
     def get_objects_of_type(types: Set[Type]) -> list[GameObject]:
@@ -142,4 +145,3 @@ class WorldManager:
     @staticmethod
     def get_out_of_sight_objects() -> list[GameObject]:
         return list((o for o in WorldManager.objects if not is_visible(o)))
-

@@ -99,7 +99,7 @@ class Player(Collidable):
             return self._harvest_wheat()
 
         return self._till_soil()
-        
+
     def _harvest_wheat(self):
         pos_x, pos_y = self.get_pos()
         WorldManager.clear_cell(pos_x, pos_y)

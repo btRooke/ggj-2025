@@ -239,3 +239,8 @@ class TerrainFactory:
 
                 obj: GameObject = terrain_map[cell](x, y)
                 WorldManager.add_object(obj)
+
+CROP_STAGES = [
+    PlantedSoil,
+    Wheat
+]

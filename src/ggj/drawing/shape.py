@@ -41,7 +41,6 @@ def world_rect(win: window, start_x: int, start_y: int, end_x: int, end_y: int):
 
     rect(win, screen_start_x, screen_start_y, screen_end_x, screen_end_y)
 
-
 def world_char(
     win: window, start_x: int, start_y: int, char: str, colour: int = 0
 ):
@@ -54,7 +53,6 @@ def world_char(
 
     screen_x = (start_x - cam_x) * 2
     screen_y = start_y - cam_y
-
 
     if screen_x < 0 or screen_x > max_width - 1:
         return
