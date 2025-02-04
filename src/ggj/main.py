@@ -210,7 +210,6 @@ def world_loop(stdscr: window):
 
 
 if __name__ == "__main__":
-    _run_mypy()
     logger.info(f"new game started")
     try:
         curses.wrapper(world_loop)
