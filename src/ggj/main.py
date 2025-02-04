@@ -4,28 +4,27 @@ import sys
 import time
 from curses import window
 from pathlib import Path
-from mypy import api
 from typing import cast
 
+from mypy import api
+
 from ggj.interface.conversation import Conversations
-from ggj.world.item import WHEAT, QUID
-from ggj.world.npc import Farmer, NPC
+from ggj.world.item import QUID, WHEAT
+from ggj.world.npc import NPC, Farmer
+
 from .events import Events
 from .input import KeyboardListener
 from .interface import InterfaceObject
 from .interface.windows import (
-    WorldViewerBorder,
-    RightOptionsMenu,
-    LeftOptionsMenu,
     DialogueBox,
+    LeftOptionsMenu,
+    RightOptionsMenu,
+    WorldViewerBorder,
 )
-from .world import player
-from .world import rat
-from .world import terrain
+from .world import player, rat, terrain
 from .world.camera import Camera
 from .world.manager import WorldManager
 from .world.tiles import WORLD_TILES
-
 
 logging.basicConfig(
     format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
@@ -37,18 +36,6 @@ PACKAGE_ROOT = Path(__file__).parent.resolve()
 
 GAME_TICK_FREQUENCY = 30
 EVENT_TICK_FREQUENCY = 10
-
-def _run_mypy() -> None:
-    """
-    Run Tim's mypy checker on the package before the game starts.
-
-    Program exits if error code is bad.
-    """
-    out, err, code = api.run([str(PACKAGE_ROOT)])
-    print(out, file=sys.stdout, end="")
-    print(err, file=sys.stderr, end="")
-    if code != 0:
-        exit(code)
 
 
 def world_loop(stdscr: window):
@@ -155,8 +142,7 @@ def world_loop(stdscr: window):
     def talk_to_npc():
         os = list(
             filter(
-                lambda o: isinstance(o, NPC)
-                and o.get_pos() in p.get_surrounding(),
+                lambda o: isinstance(o, NPC) and o.get_pos() in p.get_surrounding(),
                 WorldManager.get_all_objects(),
             )
         )

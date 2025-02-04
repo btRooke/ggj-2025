@@ -1,9 +1,9 @@
 import curses
 
-from .gameobject import GameObject
-from .item import Item, QUID, WHEAT
-from .manager import WorldManager
 from ..drawing import shape as s
+from .gameobject import GameObject
+from .item import QUID, WHEAT, Item
+from .manager import WorldManager
 
 
 class NPC(GameObject):
@@ -45,9 +45,7 @@ class NPC(GameObject):
     def draw(self) -> None:
         assert WorldManager.screen
         x, y = self.location
-        s.world_char(
-            WorldManager.screen, x, y, self.icon, colour=curses.COLOR_RED
-        )
+        s.world_char(WorldManager.screen, x, y, self.icon, colour=curses.COLOR_RED)
 
     def get_pos(self) -> tuple[int, int]:
         return self.location
@@ -64,9 +62,7 @@ class Farmer(NPC):
         super().__init__(
             "The Farmer",
             "%",
-            {
-                "start": "Hope you're ready to kill some PESTERLY EVIL MUTANT rats!"
-            },
+            {"start": "Hope you're ready to kill some PESTERLY EVIL MUTANT rats!"},
             "start",
             (25, 25),
             trades=[(WHEAT, QUID)],

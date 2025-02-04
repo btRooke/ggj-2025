@@ -1,12 +1,23 @@
-from typing_extensions import Dict, Callable
-from ..drawing import shape as s
-from .manager import WorldManager
-from .gameobject import GameObject
 import random
 import time
 
-SURROUNDING_VECTOR = [ (-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1),
-                      (0, 1), (1, 1), ]
+from typing_extensions import Callable, Dict
+
+from ..drawing import shape as s
+from .gameobject import GameObject
+from .manager import WorldManager
+
+SURROUNDING_VECTOR = [
+    (-1, -1),
+    (0, -1),
+    (1, -1),
+    (-1, 0),
+    (1, 0),
+    (-1, 1),
+    (0, 1),
+    (1, 1),
+]
+
 
 class Grass:
     def __init__(self, x: int, y: int):
@@ -52,6 +63,7 @@ class Boundary:
     def impassable(self) -> bool:
         return True
 
+
 class Hole:
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
@@ -60,8 +72,9 @@ class Hole:
     def update(self):
         pos_x, pos_y = self.pos
 
-        self.last_spill_time = time.monotonic() if self.last_spill_time == 0 \
-                else self.last_spill_time
+        self.last_spill_time = (
+            time.monotonic() if self.last_spill_time == 0 else self.last_spill_time
+        )
 
         if (time.monotonic() - self.last_spill_time) < SPILL_INTERVAL:
             return
@@ -79,7 +92,6 @@ class Hole:
                 WorldManager.add_object(Water(pos_x, pos_y))
 
         self.last_spill_time = time.monotonic()
-
 
     def draw(self):
         assert WorldManager.screen
@@ -99,6 +111,7 @@ class Hole:
 SPILL_INTERVAL = 2
 MAX_GLISTEN_INTERVAL = 5
 
+
 class Water:
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
@@ -106,7 +119,9 @@ class Water:
         self.colour = s.GLISTEN_BLUE if random.uniform(0, 1) < 0.25 else s.DEEP_BLUE
 
     def update(self):
-        if (time.monotonic() - self.last_glisten_time) > random.uniform(1, MAX_GLISTEN_INTERVAL):
+        if (time.monotonic() - self.last_glisten_time) > random.uniform(
+            1, MAX_GLISTEN_INTERVAL
+        ):
             self.colour = s.GLISTEN_BLUE if random.uniform(0, 1) < 0.5 else s.DEEP_BLUE
             self.last_glisten_time = time.monotonic()
 
@@ -123,6 +138,7 @@ class Water:
 
     def impassable(self) -> bool:
         return True
+
 
 class Soil:
     def __init__(self, x: int, y: int):
@@ -145,7 +161,9 @@ class Soil:
     def impassable(self) -> bool:
         return False
 
+
 WHEAT_TIME = 20
+
 
 class PlantedSoil:
     def __init__(self, x: int, y: int):
@@ -174,6 +192,7 @@ class PlantedSoil:
     def impassable(self) -> bool:
         return False
 
+
 class Wheat:
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
@@ -194,6 +213,7 @@ class Wheat:
 
     def impassable(self) -> bool:
         return False
+
 
 class Scarecrow:
     def __init__(self, x: int, y: int):
@@ -219,6 +239,7 @@ class Scarecrow:
     def impassable(self) -> bool:
         return False
 
+
 class TerrainFactory:
     @staticmethod
     def create_terrain(world: list[list[str]]):
@@ -240,7 +261,5 @@ class TerrainFactory:
                 obj: GameObject = terrain_map[cell](x, y)
                 WorldManager.add_object(obj)
 
-CROP_STAGES = [
-    PlantedSoil,
-    Wheat
-]
+
+CROP_STAGES = [PlantedSoil, Wheat]

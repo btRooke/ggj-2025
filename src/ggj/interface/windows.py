@@ -1,10 +1,11 @@
 import curses
 import logging
 import time
+
 from typing_extensions import Any, Optional
 
-from . import InterfaceObject
 from ..world.player import PlayerInventory
+from . import InterfaceObject
 
 logger = logging.getLogger(__name__)
 
@@ -51,9 +52,7 @@ class OptionsMenu(InterfaceObject):
         super().__init__()
         self._w = parent.subwin(OptionsMenu.HEIGHT, OptionsMenu.WIDTH, i, j)
         self.stats: dict[str, Any] = {}
-        self._ww = self._w.derwin(
-            OptionsMenu.HEIGHT - 4, OptionsMenu.WIDTH - 8, 2, 4
-        )
+        self._ww = self._w.derwin(OptionsMenu.HEIGHT - 4, OptionsMenu.WIDTH - 8, 2, 4)
 
 
 class RightOptionsMenu(OptionsMenu):
@@ -93,9 +92,7 @@ class RightOptionsMenu(OptionsMenu):
         self._health_percentage = percentage
         self._required_redraw = True
 
-    def set_option_choices(
-        self, options: list[str], option_label="Dialogue Choices"
-    ):
+    def set_option_choices(self, options: list[str], option_label="Dialogue Choices"):
         self._diag_options = options
         self._options_label = option_label
         self.draw()
@@ -173,9 +170,7 @@ class LeftOptionsMenu(OptionsMenu):
 
         self._ww.addstr("🛠️  Equipped Tool\n", curses.A_BOLD)
         self._ww.addstr(
-            self.inventory.active_item.name
-            if self.inventory.active_item
-            else "None"
+            self.inventory.active_item.name if self.inventory.active_item else "None"
         )
         self._ww.addstr("\n\n")
 
@@ -201,14 +196,10 @@ class LeftOptionsMenu(OptionsMenu):
 
 class WorldViewerBorder(InterfaceObject):
 
-    def __init__(
-        self, root_window: curses.window, world_viewer_window: curses.window
-    ):
+    def __init__(self, root_window: curses.window, world_viewer_window: curses.window):
         super().__init__()
         world_viewer_height, world_viewer_width = world_viewer_window.getmaxyx()
-        world_viewer_base_i, world_viewer_base_j = (
-            world_viewer_window.getbegyx()
-        )
+        world_viewer_base_i, world_viewer_base_j = world_viewer_window.getbegyx()
         self._w = root_window.subwin(
             world_viewer_height + 3,
             world_viewer_width + 2,

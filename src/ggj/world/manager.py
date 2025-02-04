@@ -1,11 +1,13 @@
-from typing import ClassVar, Optional, Type, Set
-from curses import window
-from .gameobject import GameObject, Collidable
-from .camera import Camera
 import logging
+from curses import window
+from typing import ClassVar, Optional, Set, Type
+
 from ..drawing import shape as s
+from .camera import Camera
+from .gameobject import Collidable, GameObject
 
 logger = logging.getLogger(__name__)
+
 
 class WorldManager:
     objects: ClassVar[dict[tuple[int, int], list[GameObject]]] = dict()
@@ -27,7 +29,6 @@ class WorldManager:
             for obj in objs:
                 obj.update()
 
-
     @staticmethod
     def _group_by_position() -> dict[tuple[int, int], list[GameObject]]:
         return WorldManager.objects
@@ -37,14 +38,16 @@ class WorldManager:
         coord_dict = WorldManager._group_by_position()
 
         for pos_x, pos_y in coord_dict.keys():
-            collidables = [o for o in coord_dict[(pos_x, pos_y)] if isinstance(o, Collidable)]
+            collidables = [
+                o for o in coord_dict[(pos_x, pos_y)] if isinstance(o, Collidable)
+            ]
             all_objects = coord_dict[(pos_x, pos_y)]
 
             if len(collidables) == 0:
                 continue
 
             for i in range(len(collidables)):
-                for j in range (len(all_objects)):
+                for j in range(len(all_objects)):
                     o1 = collidables[i]
                     o2 = all_objects[j]
 
@@ -60,8 +63,8 @@ class WorldManager:
 
         WorldManager.screen.refresh()
 
-        for (x, y) in WorldManager.objects.keys():
-            objs = sorted(WorldManager.objects[(x,y)], key=lambda o: -o.zindex())
+        for x, y in WorldManager.objects.keys():
+            objs = sorted(WorldManager.objects[(x, y)], key=lambda o: -o.zindex())
             for o in objs:
                 o.draw()
 
@@ -74,13 +77,13 @@ class WorldManager:
         return list(
             filter(
                 lambda o: o.impassable(),
-                WorldManager.objects.get((x,y), []),
+                WorldManager.objects.get((x, y), []),
             )
         )
 
     @staticmethod
     def get_objects(x: int, y: int) -> list[GameObject]:
-        objs = WorldManager.objects.get((x,y))
+        objs = WorldManager.objects.get((x, y))
         assert objs
         logging.debug(objs)
         return objs
@@ -90,6 +93,7 @@ class WorldManager:
     an object can be put on the square or the player can move
     to the square.
     """
+
     @staticmethod
     def can_place(x: int, y: int) -> int:
         return len(WorldManager._get_impassable_objects(x, y)) == 0
@@ -103,7 +107,7 @@ class WorldManager:
         assert WorldManager.screen
         objs = WorldManager.get_objects(x, y)
         objs = list(filter(lambda o: o.zindex() != 0, objs))
-        WorldManager.objects[(x,y)] = objs
+        WorldManager.objects[(x, y)] = objs
 
     @staticmethod
     def remove(obj: GameObject):
@@ -127,11 +131,21 @@ class WorldManager:
     @staticmethod
     def get_visible_objects() -> list[GameObject]:
         assert WorldManager.screen
-        return list((o for o in WorldManager.get_all_objects()\
-                if s.in_bounds(WorldManager.screen, *o.get_pos())))
+        return list(
+            (
+                o
+                for o in WorldManager.get_all_objects()
+                if s.in_bounds(WorldManager.screen, *o.get_pos())
+            )
+        )
 
     @staticmethod
     def get_out_of_sight_objects() -> list[GameObject]:
         assert WorldManager.screen
-        return list((o for o in WorldManager.get_all_objects()\
-                if not s.in_bounds(WorldManager.screen, *o.get_pos())))
+        return list(
+            (
+                o
+                for o in WorldManager.get_all_objects()
+                if not s.in_bounds(WorldManager.screen, *o.get_pos())
+            )
+        )

@@ -3,22 +3,15 @@ import logging
 import random
 import time
 from dataclasses import dataclass, field
-from typing import Optional, Callable
+from typing import Callable, Optional
+
+from ..drawing import shape as s
 from .camera import Camera
-from .gameobject import GameObject, Collidable
-from .item import Item, SHOVEL, WOODEN_STICK, SEEDS, SCYTHE, WHEAT
+from .gameobject import Collidable, GameObject
+from .item import SCYTHE, SEEDS, SHOVEL, WHEAT, WOODEN_STICK, Item
 from .manager import WorldManager
 from .rat import Rat
-from .terrain import (
-    Hole,
-    Soil,
-    Water,
-    PlantedSoil,
-    Wheat,
-    Grass,
-    SURROUNDING_VECTOR,
-)
-from ..drawing import shape as s
+from .terrain import SURROUNDING_VECTOR, Grass, Hole, PlantedSoil, Soil, Water, Wheat
 
 MOVE_CAMERA_COLS = 5
 logger = logging.getLogger(__name__)
@@ -118,8 +111,7 @@ class Player(Collidable):
         self._trigger_whack_animation()
         rats = list(
             filter(
-                lambda o: isinstance(o, Rat)
-                and o.get_pos() in self.get_surrounding(),
+                lambda o: isinstance(o, Rat) and o.get_pos() in self.get_surrounding(),
                 WorldManager.get_all_objects(),
             )
         )

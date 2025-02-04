@@ -1,7 +1,7 @@
 import curses
 import curses.textpad as text
 import logging
-from curses import window
+
 from ..world.camera import Camera
 
 GREEN = 108
@@ -22,12 +22,12 @@ logger = logging.getLogger(__name__)
 
 
 def rect(
-    win: window, start_x: int, start_y: int, end_x: int, end_y: int
+    win: curses.window, start_x: int, start_y: int, end_x: int, end_y: int
 ) -> None:
     text.rectangle(win, start_y, start_x, end_y, end_x)
 
 
-def world_rect(win: window, start_x: int, start_y: int, end_x: int, end_y: int):
+def world_rect(win: curses.window, start_x: int, start_y: int, end_x: int, end_y: int):
     cam_x, cam_y = Camera.get_pos()
 
     max_height, max_width = win.getmaxyx()
@@ -46,8 +46,9 @@ def world_rect(win: window, start_x: int, start_y: int, end_x: int, end_y: int):
 
     rect(win, screen_start_x, screen_start_y, screen_end_x, screen_end_y)
 
+
 def world_char(
-    win: window, start_x: int, start_y: int, char: str, colour: int = 0
+    win: curses.window, start_x: int, start_y: int, char: str, colour: int = 0
 ):
     cam_x, cam_y = Camera.get_pos()
 
@@ -67,12 +68,14 @@ def world_char(
 
     win.addch(screen_y, screen_x, char, curses.color_pair(colour))
 
-def in_bounds(win: window, x: int, y: int) -> bool:
+
+def in_bounds(win: curses.window, x: int, y: int) -> bool:
     cam_x, cam_y = Camera.get_pos()
     viewport, _ = win.getmaxyx()
     return abs(x - cam_x) * 2 < viewport / 2 and abs(y - cam_y) < viewport / 2
 
-def get_direction(win: window, x: int, y: int) -> set[str]:
+
+def get_direction(win: curses.window, x: int, y: int) -> set[str]:
     c_x, c_y = Camera.get_pos()
     viewport, _ = win.getmaxyx()
 
@@ -84,15 +87,15 @@ def get_direction(win: window, x: int, y: int) -> set[str]:
     directions: set[str] = set()
 
     if y < top_cam_y:
-        directions.add('n')
+        directions.add("n")
 
     if y > bottom_cam_y:
-        directions.add('s')
+        directions.add("s")
 
     if x < left_cam_x:
-        directions.add('w')
+        directions.add("w")
 
     if x > right_cam_x:
-        directions.add('e')
+        directions.add("e")
 
     return directions

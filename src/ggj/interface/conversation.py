@@ -2,7 +2,7 @@ import curses
 import logging
 
 from ggj.input import KeyboardListener
-from ggj.interface.windows import DialogueBox, RightOptionsMenu, LeftOptionsMenu
+from ggj.interface.windows import DialogueBox, LeftOptionsMenu, RightOptionsMenu
 from ggj.world.item import Item
 from ggj.world.npc import NPC
 from ggj.world.player import Player
@@ -86,9 +86,7 @@ class Conversations:
         options = ["No trade"] + [
             f"1 x {a.name} for 1 x {b.name}" for (a, b) in npc.trades
         ]
-        self.right_box.set_option_choices(
-            options, option_label=f"{npc.name}'s Offers"
-        )
+        self.right_box.set_option_choices(options, option_label=f"{npc.name}'s Offers")
 
         while True:
             choice = self.get_valid_choice(options)

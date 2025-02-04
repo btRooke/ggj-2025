@@ -1,17 +1,27 @@
-from typing_extensions import Optional, Callable, Optional
 import heapq
-import time
-from .manager import WorldManager
-from .terrain import Wheat, Grass, CROP_STAGES
-from ..drawing import shape as s
-from .gameobject import GameObject, GameObjectUtils, Collidable
-from ..events import Events, Event
-import random
 import logging
-from ..drawing import shape as s
+import random
+import time
 
-SURROUNDING_VECTOR = [ (-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1),
-                      (0, 1), (1, 1), ]
+from typing_extensions import Callable, Optional
+
+from ..drawing import shape as s
+from ..events import Event, Events
+from .gameobject import Collidable, GameObject, GameObjectUtils
+from .manager import WorldManager
+from .terrain import CROP_STAGES, Grass, Wheat
+
+SURROUNDING_VECTOR = [
+    (-1, -1),
+    (0, -1),
+    (1, -1),
+    (-1, 0),
+    (1, 0),
+    (-1, 1),
+    (0, 1),
+    (1, 1),
+]
+
 
 def next_step(start: tuple[int, int], destination: tuple[int, int]) -> tuple[int, int]:
     """
@@ -60,7 +70,9 @@ def next_step(start: tuple[int, int], destination: tuple[int, int]) -> tuple[int
 
     return backtrack
 
-STEP_INTERVAL = .5
+
+STEP_INTERVAL = 0.5
+
 
 class Rat(Collidable):
     def __init__(self, x: int, y: int):
@@ -91,8 +103,9 @@ class Rat(Collidable):
         next_pos = next_step(self.get_pos(), self.target_pos)
 
         # TODO: have the rats moving away
-        if self.target_pos == tuple(self.pos) \
-                and not len(WorldManager.get_objects_of_type(set(CROP_STAGES))):
+        if self.target_pos == tuple(self.pos) and not len(
+            WorldManager.get_objects_of_type(set(CROP_STAGES))
+        ):
             WorldManager.remove(self)
             return
 
@@ -106,7 +119,7 @@ class Rat(Collidable):
     def draw(self):
         assert WorldManager.screen
         x, y = self.pos
-        s.world_char(WorldManager.screen, x, y, '@', s.BLOOD_RED)
+        s.world_char(WorldManager.screen, x, y, "@", s.BLOOD_RED)
 
     def impassable(self) -> bool:
         return True
@@ -122,10 +135,12 @@ class Rat(Collidable):
             x, y = self.get_pos()
             logging.debug("Eaten grass")
             WorldManager.clear_cell(x, y)
-            WorldManager.add_object(Grass(x,y))
+            WorldManager.add_object(Grass(x, y))
+
 
 RAT_ATTACK_TIME = 30
 START_RATS = 4
+
 
 class RatOverseer:
     def __init__(self):
@@ -138,10 +153,9 @@ class RatOverseer:
         self.num_rounds += 1
 
         for _ in range(round(START_RATS * (self.num_rounds * 0.5))):
-            grasses = WorldManager.get_objects_of_type({ Grass })
+            grasses = WorldManager.get_objects_of_type({Grass})
             block = random.choice(grasses)
             WorldManager.add_object(Rat(*block.get_pos()))
-
 
     def _process_rat_attack(self):
         if not self.rat_attack_event.done():
@@ -162,7 +176,9 @@ class RatOverseer:
         assert WorldManager.screen
         self._process_rat_attack()
         self.rat_attack_event.check()
-        out_of_sight = [o for o in WorldManager.get_out_of_sight_objects() if isinstance(o, Rat)]
+        out_of_sight = [
+            o for o in WorldManager.get_out_of_sight_objects() if isinstance(o, Rat)
+        ]
 
         if not len(out_of_sight):
             self.on_all_rats()
