@@ -1,8 +1,7 @@
 import curses
 import curses.textpad as text
-import logging
 
-from ..world.camera import Camera
+from ggj.world.camera import Camera
 
 GREEN = 108
 DEEP_GREEN = 106
@@ -17,8 +16,6 @@ MAROON = 52
 BLOOD_RED = 52
 HOT_PINK = 132
 PURPLE = 129
-
-logger = logging.getLogger(__name__)
 
 
 def rect(

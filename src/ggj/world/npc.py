@@ -1,9 +1,9 @@
 import curses
 
-from ..drawing import shape as s
-from .gameobject import GameObject
-from .item import QUID, WHEAT, Item
-from .manager import WorldManager
+from ggj.drawing import shape as s
+from ggj.world.gameobject import GameObject
+from ggj.world.item import QUID, WHEAT, Item
+from ggj.world.manager import WorldManager
 
 
 class NPC(GameObject):

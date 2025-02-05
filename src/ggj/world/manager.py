@@ -2,9 +2,9 @@ import logging
 from curses import window
 from typing import ClassVar, Optional, Set, Type
 
-from ..drawing import shape as s
-from .camera import Camera
-from .gameobject import Collidable, GameObject
+from ggj.drawing import shape as s
+from ggj.world.camera import Camera
+from ggj.world.gameobject import Collidable, GameObject
 
 logger = logging.getLogger(__name__)
 

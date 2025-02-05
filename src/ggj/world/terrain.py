@@ -1,22 +1,13 @@
 import random
-import time
+from typing import Callable, Dict
 
-from typing_extensions import Callable, Dict
+from typing_extensions import Optional
 
-from ..drawing import shape as s
-from .gameobject import GameObject
-from .manager import WorldManager
-
-SURROUNDING_VECTOR = [
-    (-1, -1),
-    (0, -1),
-    (1, -1),
-    (-1, 0),
-    (1, 0),
-    (-1, 1),
-    (0, 1),
-    (1, 1),
-]
+from ggj.drawing import shape as s
+from ggj.util.constants import SURROUNDING_VECTOR
+from ggj.util.events import Event, Events
+from ggj.world.gameobject import GameObject
+from ggj.world.manager import WorldManager
 
 
 class Grass:
@@ -67,20 +58,16 @@ class Boundary:
 class Hole:
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
-        self.last_spill_time = 0
-
-    def update(self):
-        pos_x, pos_y = self.pos
-
-        self.last_spill_time = (
-            time.monotonic() if self.last_spill_time == 0 else self.last_spill_time
+        self.last_spill_event: Events = Events(
+            [Event(SPILL_INTERVAL, self._fill_water)]
         )
 
-        if (time.monotonic() - self.last_spill_time) < SPILL_INTERVAL:
-            return
+    def update(self):
+        self.last_spill_event.check()
 
-        # if cell next to current cell is a hole then replace the cel
-        # with water after x number of seconds
+    def _fill_water(self):
+        pos_x, pos_y = self.pos
+
         for vec_x, vec_y in SURROUNDING_VECTOR:
             n_x, n_y = pos_x + vec_x, pos_y + vec_y
             objs = WorldManager.get_objects(n_x, n_y)
@@ -90,8 +77,6 @@ class Hole:
             if is_water:
                 WorldManager.clear_cell(pos_x, pos_y)
                 WorldManager.add_object(Water(pos_x, pos_y))
-
-        self.last_spill_time = time.monotonic()
 
     def draw(self):
         assert WorldManager.screen
@@ -115,15 +100,19 @@ MAX_GLISTEN_INTERVAL = 5
 class Water:
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
-        self.last_glisten_time = 0
+        self.glisten_event: Optional[Events] = None
         self.colour = s.GLISTEN_BLUE if random.uniform(0, 1) < 0.25 else s.DEEP_BLUE
+        self._on_glisten()
 
     def update(self):
-        if (time.monotonic() - self.last_glisten_time) > random.uniform(
-            1, MAX_GLISTEN_INTERVAL
-        ):
-            self.colour = s.GLISTEN_BLUE if random.uniform(0, 1) < 0.5 else s.DEEP_BLUE
-            self.last_glisten_time = time.monotonic()
+        assert self.glisten_event
+        self.glisten_event.check()
+
+    def _on_glisten(self):
+        self.colour = s.GLISTEN_BLUE if random.uniform(0, 1) < 0.5 else s.DEEP_BLUE
+        self.glisten_event = Events(
+            [Event(random.uniform(1, MAX_GLISTEN_INTERVAL), self._on_glisten)]
+        )
 
     def get_pos(self) -> tuple[int, int]:
         return self.pos[0], self.pos[1]
@@ -168,12 +157,12 @@ WHEAT_TIME = 20
 class PlantedSoil:
     def __init__(self, x: int, y: int):
         self.pos = [x, y]
-        self.creation_time = time.monotonic()
+        self.wheat_event = Events([Event(WHEAT_TIME, self._transform_to_wheat)])
 
     def update(self):
-        if (time.monotonic() - self.creation_time) < WHEAT_TIME:
-            return
+        self.wheat_event.check()
 
+    def _transform_to_wheat(self):
         pos_x, pos_y = self.get_pos()
         WorldManager.clear_cell(pos_x, pos_y)
         WorldManager.add_object(Wheat(pos_x, pos_y))

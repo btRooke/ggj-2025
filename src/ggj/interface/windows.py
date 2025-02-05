@@ -4,8 +4,8 @@ import time
 
 from typing_extensions import Any, Optional
 
-from ..world.player import PlayerInventory
-from . import InterfaceObject
+from ggj.interface import InterfaceObject
+from ggj.world.player import PlayerInventory
 
 logger = logging.getLogger(__name__)
 

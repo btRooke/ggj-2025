@@ -1,15 +1,18 @@
 import logging
 import time
 from dataclasses import dataclass
+
 from typing_extensions import Callable
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class Event:
     time: float
     action: Callable[[], None]
     done: bool = False
+
 
 class Events:
     def __init__(self, events: list[Event]):

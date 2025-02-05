@@ -5,22 +5,12 @@ import time
 
 from typing_extensions import Callable, Optional
 
-from ..drawing import shape as s
-from ..events import Event, Events
-from .gameobject import Collidable, GameObject, GameObjectUtils
-from .manager import WorldManager
-from .terrain import CROP_STAGES, Grass, Wheat
-
-SURROUNDING_VECTOR = [
-    (-1, -1),
-    (0, -1),
-    (1, -1),
-    (-1, 0),
-    (1, 0),
-    (-1, 1),
-    (0, 1),
-    (1, 1),
-]
+from ggj.drawing import shape as s
+from ggj.util.constants import SURROUNDING_VECTOR
+from ggj.util.events import Event, Events
+from ggj.world.gameobject import Collidable, GameObject, GameObjectUtils
+from ggj.world.manager import WorldManager
+from ggj.world.terrain import CROP_STAGES, Grass, Wheat
 
 
 def next_step(start: tuple[int, int], destination: tuple[int, int]) -> tuple[int, int]:

@@ -1,8 +1,8 @@
 import curses
 import logging
 
-from ggj.input import KeyboardListener
 from ggj.interface.windows import DialogueBox, LeftOptionsMenu, RightOptionsMenu
+from ggj.util.input import KeyboardListener
 from ggj.world.item import Item
 from ggj.world.npc import NPC
 from ggj.world.player import Player

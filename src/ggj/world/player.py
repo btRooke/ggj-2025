@@ -5,13 +5,21 @@ import time
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
-from ..drawing import shape as s
-from .camera import Camera
-from .gameobject import Collidable, GameObject
-from .item import SCYTHE, SEEDS, SHOVEL, WHEAT, WOODEN_STICK, Item
-from .manager import WorldManager
-from .rat import Rat
-from .terrain import SURROUNDING_VECTOR, Grass, Hole, PlantedSoil, Soil, Water, Wheat
+from ggj.drawing import shape as s
+from ggj.world.camera import Camera
+from ggj.world.gameobject import Collidable, GameObject
+from ggj.world.item import SCYTHE, SEEDS, SHOVEL, WHEAT, WOODEN_STICK, Item
+from ggj.world.manager import WorldManager
+from ggj.world.rat import Rat
+from ggj.world.terrain import (
+    SURROUNDING_VECTOR,
+    Grass,
+    Hole,
+    PlantedSoil,
+    Soil,
+    Water,
+    Wheat,
+)
 
 MOVE_CAMERA_COLS = 5
 logger = logging.getLogger(__name__)

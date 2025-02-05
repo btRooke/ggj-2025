@@ -1,30 +1,25 @@
 import curses
 import logging
-import sys
 import time
 from curses import window
 from pathlib import Path
 from typing import cast
 
-from mypy import api
-
+from ggj.interface import InterfaceObject
 from ggj.interface.conversation import Conversations
-from ggj.world.item import QUID, WHEAT
-from ggj.world.npc import NPC, Farmer
-
-from .events import Events
-from .input import KeyboardListener
-from .interface import InterfaceObject
-from .interface.windows import (
+from ggj.interface.windows import (
     DialogueBox,
     LeftOptionsMenu,
     RightOptionsMenu,
     WorldViewerBorder,
 )
-from .world import player, rat, terrain
-from .world.camera import Camera
-from .world.manager import WorldManager
-from .world.tiles import WORLD_TILES
+from ggj.util.input import KeyboardListener
+from ggj.world import player, rat, terrain
+from ggj.world.camera import Camera
+from ggj.world.item import QUID, WHEAT
+from ggj.world.manager import WorldManager
+from ggj.world.npc import NPC, Farmer
+from ggj.world.tiles import WORLD_TILES
 
 logging.basicConfig(
     format="[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s",
@@ -178,9 +173,6 @@ def world_loop(stdscr: window):
     last_health_tick = time.monotonic()
     health = 1.0
 
-    # events
-    events = Events([])
-
     # main loop
     last_tick = 0.0
     last_game_tick = 0.0
@@ -206,7 +198,6 @@ def world_loop(stdscr: window):
         last_tick = current_time
 
         il.check_input()
-        events.check()
 
 
 if __name__ == "__main__":
