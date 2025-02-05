@@ -2,8 +2,7 @@ import heapq
 import logging
 import random
 import time
-
-from typing_extensions import Callable, Optional
+from typing import Callable, Optional
 
 from ggj.drawing import shape as s
 from ggj.util.constants import SURROUNDING_VECTOR

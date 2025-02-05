@@ -1,7 +1,5 @@
 import random
-from typing import Callable, Dict
-
-from typing_extensions import Optional
+from typing import Callable, Dict, Optional
 
 from ggj.drawing import shape as s
 from ggj.util.constants import SURROUNDING_VECTOR

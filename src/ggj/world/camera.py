@@ -5,18 +5,6 @@ class Camera:
     pos: ClassVar[list[int]] = [0, 0]
 
     @staticmethod
-    def update():
-        pass
-
-    @staticmethod
-    def draw():
-        pass
-
-    @staticmethod
-    def init():
-        pass
-
-    @staticmethod
     def get_pos() -> tuple[int, int]:
         return (Camera.pos[0], Camera.pos[1])
 

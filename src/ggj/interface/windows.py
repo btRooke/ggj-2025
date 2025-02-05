@@ -1,8 +1,7 @@
 import curses
 import logging
 import time
-
-from typing_extensions import Any, Optional
+from typing import Any, Optional
 
 from ggj.interface import InterfaceObject
 from ggj.world.player import PlayerInventory
