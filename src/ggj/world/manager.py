@@ -3,7 +3,6 @@ from curses import window
 from typing import ClassVar, Optional, Set, Type
 
 from ggj.drawing import shape as s
-from ggj.world.camera import Camera
 from ggj.world.gameobject import Collidable, GameObject
 
 logger = logging.getLogger(__name__)
@@ -21,8 +20,6 @@ class WorldManager:
 
     @staticmethod
     def update():
-        Camera.update()
-
         WorldManager._process_collisions()
 
         for _, objs in WorldManager.objects.items():
