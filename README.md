@@ -19,7 +19,7 @@ We are [participating in-person in Edinburgh](https://globalgamejam.org/jam-site
 
 - `;` is a grassy square (default)
 - Use a scythe on a grassy square (next to water) to get a cleaned up square `!`
-- Use seeds on a cleaned up square to get a planted seed ```
+- Use seeds on a cleaned up square to get a planted seed `` ` ``
 - Use the scythe to harvest the plant once grown `$` 
 
 ### Rats
