@@ -1,8 +1,8 @@
-# Global Game Jam 2025
+# Global Game Jam 2025 | Rat Attack
 
 A game created by [Tim Beatham](https://github.com/tim-beatham) and [Billy Rooke](https://github.com/btRooke) for the Global Game Jam 2025.
 
-We are [participating in-person in Edinburgh](https://globalgamejam.org/jam-sites/2025/edinburgh-game-jam-2025).
+We [participated in-person in Edinburgh](https://globalgamejam.org/jam-sites/2025/edinburgh-game-jam-2025).
 
 ![Screenshot from 2025-03-03 11-16-07](https://github.com/user-attachments/assets/54682771-0dab-47f1-96b4-8177f7bb5a49)
 
